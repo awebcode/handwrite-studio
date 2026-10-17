@@ -5,6 +5,7 @@ export default {
   roll: "2200000001",
   section: "A",
   batch: "22",
+  batchLabel: "00A Day",   // shown on the cover page
   date: "1 January, 2027",
 
   // handwriting

@@ -4,6 +4,7 @@ export default {
   roll: "2200000002",
   section: "A",
   batch: "22",
+  batchLabel: "00A Day",   // shown on the cover page
   date: "2 January, 2027",
 
   font: "kalam", fs: 17.4, lh: 1.8, ink: "#161616",

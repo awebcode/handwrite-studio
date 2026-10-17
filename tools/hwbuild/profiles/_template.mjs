@@ -4,6 +4,7 @@ export default {
   name: "Full Name",
   roll: "0000000000",
   section: "A",
+  batchLabel: "00A Day",   // shown on the cover page
   batch: "225",
   date: "1 January, 2027",
 

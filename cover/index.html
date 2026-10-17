@@ -26,14 +26,32 @@
   button.on { background:var(--ui-acc); color:#fff; border-color:var(--ui-acc); }
   button.sm { padding:4px 9px; font-size:12px; }
   #none { color:var(--ui-mute); font-size:13px; }
-  #stagewrap { flex:1; overflow:auto; padding:22px; display:flex; justify-content:center; align-items:flex-start; }
+  #stagewrap { flex:1; overflow:auto; padding:66px 22px 22px; display:flex; justify-content:center; align-items:flex-start; }
   #stage { position:relative; }
+  #topbar { position:fixed; top:12px; right:16px; z-index:30; display:flex; gap:8px; align-items:center; background:var(--ui-panel); border:1px solid var(--ui-line); border-radius:12px; padding:8px; box-shadow:0 6px 22px rgba(0,0,0,.16); }
+  #topbar input[type=text], #topbar select { padding:7px 9px; border:1px solid var(--ui-line); border-radius:7px; background:transparent; color:inherit; font:inherit; }
+  #topbar input[type=text] { width:200px; }
+  #more { position:relative; }
+  #more summary { list-style:none; cursor:pointer; padding:6px 12px; border:1px solid var(--ui-line); border-radius:7px; font-size:18px; line-height:1; user-select:none; }
+  #more summary::-webkit-details-marker { display:none; }
+  #more .menu { position:absolute; right:0; top:calc(100% + 6px); min-width:190px; background:var(--ui-panel); border:1px solid var(--ui-line); border-radius:10px; padding:6px; display:flex; flex-direction:column; gap:4px; box-shadow:0 8px 24px rgba(0,0,0,.2); }
+  #more .menu button { text-align:left; border:0; }
+  #more .menu button:hover { background:var(--ui-bg); }
+  @media (max-width: 900px) { #topbar { position:static; margin:10px; flex-wrap:wrap; } #stagewrap { padding-top:22px; } }
+  #bubble { position:absolute; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:2px; max-width:600px; background:#1d2330; color:#fff; border-radius:10px; padding:4px; box-shadow:0 8px 24px rgba(0,0,0,.3); }
+  #bubble[hidden] { display:none; }
+  #bubble button { background:transparent; color:#fff; border:0; padding:5px 8px; border-radius:6px; font-size:13px; line-height:1.1; }
+  #bubble button:hover { background:#3b5bdb; }
+  #bubble button.on { background:#3b5bdb; }
+  #bubble button.danger:hover { background:#e03131; }
+  #bubble .sep { width:1px; align-self:stretch; background:#4a5268; margin:2px 3px; }
+  #bubble input[type=color] { width:26px; height:24px; padding:0; border:0; border-radius:5px; background:none; cursor:pointer; }
   #toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:9px 14px; border-radius:8px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; }
   #toast.show { opacity:1; }
   #over { display:none; position:absolute; left:0; right:0; border-top:2px dashed #e03131; font-size:11px; color:#e03131; text-align:right; padding-top:2px; }
   .hint-drop { outline:3px dashed var(--ui-acc); outline-offset:-6px; }
   @media (max-width: 900px) { body { flex-direction:column; } #panel { width:100%; height:auto; position:static; border-right:0; border-bottom:1px solid var(--ui-line); } }
-  @media print { #panel, #toast, #over { display:none !important; } body { background:#fff; display:block; } #stagewrap { padding:0; display:block; overflow:visible; } #stage { width:auto !important; height:auto !important; } #sheet { transform:none !important; box-shadow:none !important; } .ui { display:none !important; } @page { size:A4; margin:0; } }
+  @media print { #panel, #topbar, #bubble, #toast, #over { display:none !important; } body { background:#fff; display:block; } #stagewrap { padding:0; display:block; overflow:visible; } #stage { width:auto !important; height:auto !important; } #sheet { transform:none !important; box-shadow:none !important; } .ui { display:none !important; } @page { size:A4; margin:0; } }
 </style>
 
 <style id="sheetcss">
@@ -67,24 +85,25 @@
 </style>
 </head>
 <body>
+<div id="topbar">
+  <input type="text" id="fname" value="cover-page" title="File name" aria-label="File name">
+  <select id="fmt" title="Download format" aria-label="Download format"><option value="png">PNG</option><option value="pdf">PDF</option></select>
+  <button class="pri" id="bDownload">⬇ Download</button>
+  <details id="more"><summary title="More options">⋯</summary>
+    <div class="menu">
+      <button id="bPrint">Print</button>
+      <button id="bLink">Copy link</button>
+      <button id="bSave">Save design (.json)</button>
+      <button id="bLoad">Load design…</button>
+      <button id="bReset">Reset</button>
+    </div>
+  </details>
+  <input type="file" id="fJson" accept="application/json,.json" hidden>
+  <input type="file" id="fImg" accept="image/*" hidden>
+</div>
 <aside id="panel">
   <h1>Cover Page Maker</h1>
   <p class="tip">Click any text to edit it. Click a block to style it. Drag the blue grip to reorder. Drop an image on the logo.</p>
-
-  <h2>Export</h2>
-  <div class="row"><label for="fname">File name</label><input type="text" id="fname" value="cover-page"></div>
-  <div class="row">
-    <button class="pri" id="bPdf">⬇ Download PDF</button>
-    <button id="bPng">PNG</button>
-    <button id="bPrint">Print</button>
-  </div>
-  <div class="row">
-    <button class="sm" id="bSave">Save design (.json)</button>
-    <button class="sm" id="bLoad">Load</button>
-    <button class="sm" id="bReset">Reset</button>
-    <input type="file" id="fJson" accept="application/json,.json" hidden>
-    <input type="file" id="fImg" accept="image/*" hidden>
-  </div>
 
   <h2>Selected block</h2>
   <div id="none">Nothing selected. Click a line, the logo or the table.</div>
@@ -158,7 +177,7 @@
   <div class="row"><label>Zoom</label><input type="range" id="zoom" min="0.4" max="1.4" step="0.05"><span id="vzoom"></span></div>
 </aside>
 
-<div id="stagewrap"><div id="stage"><div class="sheet" id="sheet"></div><div id="over" class="ui">Content runs past the bottom of the A4 page</div></div></div>
+<div id="stagewrap"><div id="stage"><div class="sheet" id="sheet"></div><div id="bubble" class="ui" hidden></div><div id="over" class="ui">Content runs past the bottom of the A4 page</div></div></div>
 <div id="toast"></div>
 
 <script>
@@ -173,35 +192,43 @@ let uid = 0;
 const id = () => "b" + Date.now().toString(36) + (uid++);
 const T = (html, o = {}) => ({ id: id(), type: "text", html, size: 15, bold: false, italic: false, under: false, align: "center", color: "", font: "", mt: 0, mb: 0, lh: 1.25, ls: 0, ...o });
 
-function defaults() {
-  const A = "#0e5a6b";
+function defaults(v = {}) {
+  const A = v.accent || "#0e5a6b";
+  const g = (k, d) => (v[k] !== undefined && v[k] !== "" ? esc(v[k]) : d);
+  const title = g("title", "Assignment 1");
+  const rows = [[g("id", "0000000000"), g("name", "Your Full Name")]];
+  for (let i = 2; i <= 6; i++) if (v["id" + i] || v["name" + i]) rows.push([g("id" + i, "&nbsp;"), g("name" + i, "&nbsp;")]);
   return {
     v: 1,
-    page: { font: "'Times New Roman', 'Liberation Serif', Times, serif", scale: 1, padV: 62, padH: 70, just: "flex-start", frame: false, frameW: 2, frameC: "#222222", frameI: 22, accent: A, head: "#4472c4", headInk: "#111111", row: "#dbe5f1", grid: "#8eaadb", paper: "#ffffff", zoom: 0.85 },
+    page: { font: v.font || "'Times New Roman', 'Liberation Serif', Times, serif", scale: 1, padV: 62, padH: 70, just: "flex-start", frame: v.border === "1", frameW: 2, frameC: "#222222", frameI: 22, accent: A, head: v.head || "#4472c4", headInk: "#111111", row: v.row || "#dbe5f1", grid: "#8eaadb", paper: "#ffffff", zoom: v.zoom ? +v.zoom : 0.85 },
     blocks: [
-      { id: id(), type: "logo", src: "", w: 76, mb: 6, align: "center" },
-      T("Assignment 1", { size: 31, bold: true, mb: 14 }),
-      T("Course Title: Course Name<br>Course code: CSE0000000", { size: 14, mb: 14 }),
-      T("Spring 2026", { size: 17 }),
-      T("Batch 00A Day", { size: 14, mb: 14 }),
-      T("Assignment: Assignment 1", { size: 28, bold: true, mb: 14 }),
-      T("<b>Date of Submission</b>: 01-01-2026", { size: 14.5, mb: 24 }),
+      { id: id(), key: "logo", type: "logo", src: v.logo ? v.logo : "", w: 76, mb: 6, align: "center" },
+      T(title, { key: "title", size: 31, bold: true, mb: 14 }),
+      T(`Course Title: ${g("course", "Course Name")}<br>Course code: ${g("code", "CSE0000000")}`, { key: "course", size: 14, mb: 14 }),
+      T(g("term", "Spring 2026"), { key: "term", size: 17 }),
+      T(`Batch ${g("batch", "00A Day")}`, { key: "batch", size: 14, mb: 14 }),
+      T(`Assignment: ${v.assignment ? g("assignment") : title}`, { key: "assignment", size: 28, bold: true, mb: 14 }),
+      T(`<b>Date of Submission</b>: ${g("date", "01-01-2026")}`, { key: "date", size: 14.5, mb: 24 }),
       T("Submitted to-", { size: 14.5, bold: true, mb: 6 }),
-      T("Teacher Name", { size: 19, bold: true, color: A, font: "Arial, 'Liberation Sans', Helvetica, sans-serif" }),
-      T("Lecturer", { size: 19, color: A }),
-      T("Department of CSE", { size: 19, color: A }),
-      T("Example University", { size: 14, color: A }),
-      T("City, Country", { size: 14, color: A, mb: 24 }),
+      T(g("teacher", "Teacher Name"), { key: "teacher", size: 19, bold: true, color: A, font: "Arial, 'Liberation Sans', Helvetica, sans-serif" }),
+      T(g("role", "Lecturer"), { key: "role", size: 19, color: A }),
+      T(g("dept", "Department of CSE"), { key: "dept", size: 19, color: A }),
+      T(g("university", "Example University"), { key: "university", size: 14, color: A }),
+      T(g("city", "City, Country"), { key: "city", size: 14, color: A, mb: 24 }),
       { id: id(), type: "spacer", h: 56 },
       T("Submitted By-", { size: 14.5, bold: true, mb: 12 }),
-      { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: true, mt: 0, mb: 0, headers: ["ID", "Name"], rows: [["0000000000", "Your Full Name"]] },
+      { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: true, mt: 0, mb: 0, headers: ["ID", "Name"], rows },
     ],
   };
 }
 
 /* ---------- state ---------- */
 let S = null, sel = null;
-const KEY = "cover.v1";
+const QP = new URLSearchParams(location.search);
+const FIELD_KEYS = ["title", "course", "code", "term", "batch", "assignment", "date", "teacher", "role", "dept", "university", "city", "id", "name", "logo", "id2", "name2"];
+const fromUrl = FIELD_KEYS.some((k) => QP.has(k));
+const KEY = "cover.v1" + (fromUrl ? ":" + location.search : "");
+const urlVals = () => Object.fromEntries([...QP.entries()]);
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 let saveT; const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(() => { save(); checkOverflow(); }, 250); };
 const blockById = (i) => S.blocks.find((b) => b.id === i);
@@ -252,7 +279,7 @@ function applyPage() {
 function render() {
   applyPage();
   $("sheet").innerHTML = `<div class="frame"></div><div class="inner" style="justify-content:${S.page.just}">` + S.blocks.map(blockHtml).join("") + "</div>";
-  bind(); syncPanel(); checkOverflow();
+  bind(); syncPanel(); checkOverflow(); updateBubble();
 }
 function checkOverflow() {
   const inner = $("sheet").querySelector(".inner"); if (!inner) return;
@@ -303,6 +330,70 @@ function select(i, rerender) {
   syncPanel();
 }
 
+/* ---------- floating action bar on the selected block ---------- */
+function updateBubble() {
+  const bub = $("bubble"), b = cur();
+  const el = b && document.querySelector(`.blk[data-id="${b.id}"]`);
+  if (!el) { bub.hidden = true; return; }
+  const btn = (act, label, title, cls = "") => `<button data-a="${act}" title="${title}" class="${cls}">${label}</button>`;
+  const sep = '<span class="sep"></span>';
+  let h = "";
+  if (b.type === "text") {
+    h += btn("edit", "✎ Edit", "Edit this text") + sep + btn("bold", "<b>B</b>", "Bold", b.bold ? "on" : "") + btn("italic", "<i>I</i>", "Italic", b.italic ? "on" : "") + btn("under", "<u>U</u>", "Underline", b.under ? "on" : "") + sep +
+      btn("smaller", "A−", "Smaller") + btn("bigger", "A+", "Bigger") + sep +
+      btn("left", "⟸", "Align left", b.align === "left" ? "on" : "") + btn("center", "≡", "Centre", b.align === "center" ? "on" : "") + btn("right", "⟹", "Align right", b.align === "right" ? "on" : "") + sep +
+      `<input type="color" data-a="color" value="${b.color || "#000000"}" title="Text colour">`;
+  } else if (b.type === "logo") {
+    h += btn("pick", "⇄ Replace", "Choose another image") + btn("nologo", "✕ Remove image", "Show an empty drop zone") + btn("deflogo", "Default", "Use the default shield") + sep + btn("smaller", "−", "Smaller") + btn("bigger", "+", "Bigger");
+  } else if (b.type === "table") {
+    h += btn("addr", "+ Row", "Add a row") + btn("delr", "− Row", "Remove the last row") + btn("addc", "+ Col", "Add a column") + btn("delc", "− Col", "Remove the last column") + sep + btn("smaller", "A−", "Smaller text") + btn("bigger", "A+", "Bigger text");
+  } else if (b.type === "spacer") {
+    h += btn("smaller", "− Space", "Less space") + btn("bigger", "+ Space", "More space");
+  }
+  h += (h ? sep : "") + btn("up", "↑", "Move up") + btn("down", "↓", "Move down") + btn("dup", "⧉ Copy", "Duplicate") + btn("del", "🗑 Delete", "Delete this block", "danger");
+  bub.innerHTML = h; bub.hidden = false;
+  const st = $("stage").getBoundingClientRect(), r = el.getBoundingClientRect();
+  const w = bub.offsetWidth, hh = bub.offsetHeight;
+  let top = r.top - st.top - hh - 8; if (top < 0) top = r.bottom - st.top + 8;
+  let left = r.left - st.left + (r.width - w) / 2; left = Math.max(0, Math.min(left, st.width - w));
+  bub.style.top = top + "px"; bub.style.left = left + "px";
+}
+$("bubble").addEventListener("mousedown", (e) => { if (e.target.tagName !== "INPUT") e.preventDefault(); });
+$("bubble").addEventListener("input", (e) => { if (e.target.dataset.a === "color") { cur().color = e.target.value; const k = sel; render(); select(k, true); } });
+$("bubble").addEventListener("click", (e) => {
+  const a = e.target.closest("button") && e.target.closest("button").dataset.a; if (!a) return;
+  const b = cur(); if (!b) return;
+  const again = () => { const k = b.id; render(); save(); if (blockById(k)) select(k, true); };
+  const num = (k, d, lo, hi) => { b[k] = Math.max(lo, Math.min(hi, +(b[k] + d).toFixed(2))); again(); };
+  switch (a) {
+    case "edit": { const t = document.querySelector(`.blk[data-id="${b.id}"] .t`); if (t) { t.focus(); const r = document.createRange(); r.selectNodeContents(t); r.collapse(false); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); } break; }
+    case "bold": b.bold = !b.bold; again(); break;
+    case "italic": b.italic = !b.italic; again(); break;
+    case "under": b.under = !b.under; again(); break;
+    case "left": case "center": case "right": b.align = a; again(); break;
+    case "smaller": case "bigger": {
+      const d = a === "bigger" ? 1 : -1;
+      if (b.type === "text") num("size", d, 8, 64); else if (b.type === "logo") num("w", d * 10, 30, 400);
+      else if (b.type === "table") { b.rowSize = Math.max(9, Math.min(34, b.rowSize + d)); b.headSize = Math.max(8, Math.min(30, b.headSize + d)); again(); }
+      else if (b.type === "spacer") num("h", d * 10, 0, 400);
+      break;
+    }
+    case "pick": pickLogo(b.id); break;
+    case "nologo": b.src = null; again(); break;
+    case "deflogo": b.src = ""; again(); break;
+    case "addr": b.rows.push(b.headers.map(() => "&nbsp;")); again(); break;
+    case "delr": if (b.rows.length > 1) b.rows.pop(); again(); break;
+    case "addc": b.headers.push("Column"); b.rows.forEach((r) => r.push("&nbsp;")); again(); break;
+    case "delc": if (b.headers.length > 1) { b.headers.pop(); b.rows.forEach((r) => r.pop()); } again(); break;
+    case "up": case "down": { const i = S.blocks.indexOf(b), j = i + (a === "up" ? -1 : 1); if (j >= 0 && j < S.blocks.length) { S.blocks.splice(i, 1); S.blocks.splice(j, 0, b); } again(); break; }
+    case "dup": { const c = JSON.parse(JSON.stringify(b)); c.id = id(); S.blocks.splice(S.blocks.indexOf(b) + 1, 0, c); sel = c.id; render(); save(); break; }
+    case "del": S.blocks.splice(S.blocks.indexOf(b), 1); sel = null; render(); save(); break;
+  }
+});
+window.addEventListener("resize", updateBubble);
+$("stagewrap").addEventListener("scroll", updateBubble);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { sel = null; document.querySelectorAll(".blk.sel").forEach((x) => x.classList.remove("sel")); syncPanel(); } });
+
 /* ---------- panel <-> model ---------- */
 const rng = (idn, vid, get, set, fmt = (v) => v) => {
   const el = $(idn);
@@ -339,6 +430,7 @@ function syncPanel() {
   $("pPadH").value = p.padH; $("vpPadH").textContent = p.padH; $("pJust").value = p.just; $("pFrame").checked = p.frame; $("pFrameW").value = p.frameW;
   $("pFrameC").value = p.frameC; $("pFrameI").value = p.frameI; $("vpFrameI").textContent = p.frameI; $("pAccent").value = p.accent; $("pHead").value = p.head;
   $("pHeadInk").value = p.headInk; $("pRow").value = p.row; $("pGrid").value = p.grid; $("pPaper").value = p.paper; $("zoom").value = p.zoom; $("vzoom").textContent = p.zoom;
+  updateBubble();
 }
 function wirePanel() {
   const setB = (k) => (v) => { const b = cur(); if (b) b[k] = v; };
@@ -421,6 +513,28 @@ function exportHtml() {
   const css = $("sheetcss").textContent;
   return `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}${css}.blk:hover{outline:0!important}</style></head><body>${sh.outerHTML}</body></html>`;
 }
+const H2C = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+const JSPDF = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+const loadScript = (src) => new Promise((ok, bad) => { const x = document.createElement("script"); x.src = src; x.onload = ok; x.onerror = bad; document.head.appendChild(x); });
+async function sheetCanvas() {
+  if (!window.html2canvas) await loadScript(H2C);
+  const holder = document.createElement("div"); holder.style.cssText = "position:fixed;left:-10000px;top:0";
+  const sh = $("sheet").cloneNode(true); sh.removeAttribute("id");
+  sh.querySelectorAll(".ui,.grip").forEach((e) => e.remove());
+  sh.querySelectorAll("[contenteditable]").forEach((e) => e.removeAttribute("contenteditable"));
+  sh.querySelectorAll(".blk").forEach((e) => e.classList.remove("sel"));
+  sh.style.transform = "none"; sh.style.boxShadow = "none"; sh.style.overflow = "hidden";
+  holder.appendChild(sh); document.body.appendChild(holder);
+  try { return await window.html2canvas(sh, { scale: 2, backgroundColor: S.page.paper, useCORS: true }); } finally { holder.remove(); }
+}
+async function clientExport(kind) {
+  const canvas = await sheetCanvas();
+  if (kind === "png") return canvas.toBlob((b) => download(b, fileBase() + ".png"));
+  if (!window.jspdf) await loadScript(JSPDF);
+  const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+  pdf.addImage(canvas.toDataURL("image/jpeg", 0.96), "JPEG", 0, 0, 210, 297);
+  pdf.save(fileBase() + ".pdf");
+}
 const fileBase = () => ($("fname").value || "cover-page").replace(/[^\w.-]+/g, "_");
 function download(blob, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
 async function serverExport(kind) {
@@ -428,18 +542,41 @@ async function serverExport(kind) {
   if (!r.ok) throw new Error("export failed " + r.status);
   download(await r.blob(), fileBase() + "." + kind);
 }
-$("bPdf").onclick = async () => {
+const doPdf = async () => {
   toast("Rendering PDF…");
   try { await serverExport("pdf"); toast("PDF downloaded"); }
-  catch (e) { toast("Server export unavailable - opening print dialog (choose Save as PDF)"); setTimeout(() => window.print(), 600); }
+  catch (e) {
+    try { await clientExport("pdf"); toast("PDF downloaded"); }
+    catch (e2) { toast("Opening print dialog - choose Save as PDF"); setTimeout(() => window.print(), 600); }
+  }
 };
-$("bPng").onclick = async () => { toast("Rendering PNG…"); try { await serverExport("png"); toast("PNG downloaded"); } catch (e) { toast("PNG needs the preview server (npm run hw:preview)"); } };
+const doPng = async () => {
+  toast("Rendering PNG…");
+  try { await serverExport("png"); toast("PNG downloaded"); }
+  catch (e) { try { await clientExport("png"); toast("PNG downloaded"); } catch (e2) { toast("PNG export failed (offline?)"); } }
+};
+$("bDownload").onclick = () => { try { localStorage.setItem("cover.fmt", $("fmt").value); } catch (e) {} return $("fmt").value === "pdf" ? doPdf() : doPng(); };
+try { const f = localStorage.getItem("cover.fmt"); if (f === "pdf" || f === "png") $("fmt").value = f; } catch (e) {}
+document.addEventListener("click", (e) => { const d = $("more"); if (d.open && !d.contains(e.target)) d.open = false; });
 $("bPrint").onclick = () => window.print();
 $("bSave").onclick = () => download(new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }), fileBase() + ".json");
 $("bLoad").onclick = () => $("fJson").click();
 $("fJson").onchange = (e) => e.target.files[0] && loadJson(e.target.files[0]);
 function loadJson(f) { const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (!d.blocks || !d.page) throw 0; S = d; sel = null; render(); save(); toast("Design loaded"); } catch (e) { toast("Not a valid design file"); } }; r.readAsText(f); }
 $("bReset").onclick = () => { if (confirm("Reset the cover page to the default design?")) { S = defaults(); sel = null; render(); save(); } };
+$("bLink").onclick = () => {
+  const t = (n) => (S.blocks.find((b) => b.key === n) || {}).html || "";
+  const strip = (h) => String(h).replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+  const tb = S.blocks.find((b) => b.type === "table");
+  const q = new URLSearchParams();
+  q.set("title", strip(t("title"))); q.set("term", strip(t("term"))); q.set("batch", strip(t("batch")).replace(/^Batch\s*/, ""));
+  const course = strip(t("course")).split("\n"); q.set("course", (course[0] || "").replace(/^Course Title:\s*/, "")); q.set("code", (course[1] || "").replace(/^Course code:\s*/, ""));
+  q.set("assignment", strip(t("assignment")).replace(/^Assignment:\s*/, "")); q.set("date", strip(t("date")).replace(/^Date of Submission:\s*/, ""));
+  ["teacher", "role", "dept", "university", "city"].forEach((k) => q.set(k, strip(t(k))));
+  if (tb) tb.rows.forEach((r, i) => { q.set(i ? "id" + (i + 1) : "id", strip(r[0])); q.set(i ? "name" + (i + 1) : "name", strip(r[1])); });
+  const u = location.origin + location.pathname + "?" + q.toString();
+  (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast("Link copied"), () => prompt("Copy this link", u));
+};
 let tt; function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2600); }
 
 /* ---------- boot: saved design > local preset > defaults ---------- */
@@ -447,14 +584,18 @@ let tt; function toast(m) { const t = $("toast"); t.textContent = m; t.classList
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
   if (saved && saved.blocks && saved.page) S = saved;
+  else if (fromUrl) S = defaults(urlVals());
   else {
     try { const r = await fetch("/cover/preset.local.json"); if (r.ok) { const d = await r.json(); if (d.blocks && d.page) S = d; } } catch (e) {}
   }
   if (!S) S = defaults();
+  if (QP.get("file")) $("fname").value = QP.get("file");
   wirePanel(); render();
   document.body.dataset.ready = "1";
+  const auto = QP.get("download");
+  if (auto === "pdf" || auto === "png") { $("fmt").value = auto; setTimeout(() => $("bDownload").click(), 700); }
 })();
-document.addEventListener("click", (e) => { if (!e.target.closest(".blk") && !e.target.closest("#panel")) { sel = null; document.querySelectorAll(".blk.sel").forEach((x) => x.classList.remove("sel")); syncPanel(); } });
+document.addEventListener("click", (e) => { if (!e.composedPath().some((n) => n.id === "bubble" || n.id === "panel" || n.id === "topbar" || (n.classList && n.classList.contains("blk")))) { sel = null; document.querySelectorAll(".blk.sel").forEach((x) => x.classList.remove("sel")); syncPanel(); } });
 </script>
 </body>
 </html>

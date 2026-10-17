@@ -12,7 +12,10 @@ export default {
   courseCode: "CSE0000000",
   university: "Example University",
   dept: "Department of CSE",
+  city: "City, Country",
   term: "Fall 26",
+  instructor: "Teacher Name",
+  instructorRole: "Lecturer",
   // question index where each section starts; the heading text comes from the student profile
   sections: [{ from: 0, key: "theory" }, { from: 5, key: "programs" }],
 

@@ -57,20 +57,50 @@ An editable **A4 cover page** (logo, title, course, batch, date, "Submitted to",
 
 ![cover editor](docs/cover-editor.png)
 
+![preview header with a Cover page button per student](docs/preview-header.png)
+
 ```bash
 npm run cover        # then open http://localhost:8080/cover
 ```
 
 - **Everything is editable in place** - click any line, label or table cell and type. Ctrl+B / I / U work inside a line.
-- **Click a block to style it**: size, bold / italic / underline, colour, font, alignment, space above / below, line height, letter spacing.
+- **Click any block** and a small action bar appears on it: Edit, bold / italic / underline, bigger / smaller, align, colour, move up / down, duplicate and **Delete** (logo: Replace / Remove; table: add or remove rows and columns). The side panel has the finer controls: size, bold / italic / underline, colour, font, alignment, space above / below, line height, letter spacing.
 - **Drag the blue grip** to reorder blocks; **add** text lines, tables, logos, dividers and spacers; duplicate or delete any block.
 - **Logo**: drag & drop an image onto the page (or onto the logo), or click *Replace*. Remove it or go back to the default shield.
 - **Table**: add / remove rows and columns, change width, text sizes, row height, header and row colours.
 - **Page**: font, text scale, margins, vertical alignment, optional page border, accent / table / paper colours, zoom.
-- **Export**: *Download PDF* (vector text, exact A4, rendered by headless Chromium), *PNG* (2x), *Print*, plus *Save design (.json)* / *Load* to reuse a design. Your design is also remembered in the browser.
+- **Download bar (top right)**: file name, format (**PNG by default**, or PDF) and a **Download** button; the **⋯** menu has Print, Copy link, Save design (.json), Load design and Reset. PNG is 2x (1588 x 2244); PDF is exact A4. With the preview server running the PDF has real vector text; without it the page renders the file in the browser instead.
+- **Per-student cover pages**: the preview page shows a **Cover page** button under each student (and next to Download as PDF). It opens `/cover` prefilled with that student's name, roll, batch, date, course, instructor and so on, and every field stays editable. Your edits are remembered per link.
 - **Your own default content**: put a saved design at `cover/preset.local.json` (git-ignored) and it loads automatically on first open.
 
-If you open `cover/index.html` without the preview server, everything works except PDF / PNG download; the *Download PDF* button then falls back to the browser's print dialog (choose *Save as PDF*).
+### Fill the cover page from the URL
+
+Every field can be set with a query parameter, so you can link, bookmark or script cover pages:
+
+```
+/cover?title=Lab+Assignment+1&course=Course+Name&code=CSE0000000&term=Fall+26&batch=00A+Day
+      &assignment=Lab+Assignment+1&date=01-01-2027&teacher=Teacher+Name&role=Lecturer
+      &dept=Department+of+CSE&university=Example+University&city=Dhaka
+      &id=2200000001&name=Alice+Rahman&file=MY-COVER&download=png
+```
+
+| param | field |
+|---|---|
+| `title` | big title (default `Assignment 1`) |
+| `course` `code` | course title and code |
+| `term` `batch` | semester line and batch line |
+| `assignment` | the "Assignment: ..." line |
+| `date` | date of submission |
+| `teacher` `role` `dept` `university` `city` | "Submitted to" block |
+| `id` `name` (`id2` `name2` ... up to 6 rows) | "Submitted by" table rows |
+| `logo` | logo image URL (or drop an image on the page) |
+| `file` | download file name |
+| `download` | `png` or `pdf`: start the download as soon as the page opens |
+| `font` `accent` `head` `row` `border` `zoom` | page font, accent colour, table colours, `border=1` for a page frame, zoom |
+
+The instructor, course, term and city for the preview buttons come from your assignment file (`instructor`, `instructorRole`, `course`, `term`, `city`, ...), and `batchLabel` from each student profile.
+
+If you open `cover/index.html` without the preview server, everything still works: PNG / PDF are rendered in the browser (needs internet once, to load the html2canvas and jsPDF libraries from cdnjs).
 
 ## Project layout
 

@@ -9,7 +9,10 @@ export default {
   courseCode: "CSE0000000",
   university: "Uttara University",
   dept: "Department of CSE",
+  city: "City, Country",          // shown on the cover page
   term: "Fall 26",
+  instructor: "Teacher Name",       // shown on the cover page
+  instructorRole: "Lecturer",
   sections: [{ from: 0, key: "theory" }],   // optional; heading text comes from each profile.sectionNames
 
   questions: [

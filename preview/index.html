@@ -14,6 +14,9 @@
   .bar h1 { margin:0; font-size:20px; }
   .bar small { display:block; opacity:.75; font-size:12px; }
   .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+  .item { display:inline-flex; flex-direction:column; gap:5px; }
+  .item a.cv { text-align:center; font:11.5px system-ui, sans-serif; letter-spacing:.04em; color:inherit; text-decoration:none; border:1px solid rgba(243,234,215,.35); border-radius:999px; padding:3px 10px; }
+  .item a.cv:hover { background:var(--accent); border-color:var(--accent); }
   .tabs button, select { background:transparent; color:inherit; border:1px solid rgba(243,234,215,.35); border-radius:999px; padding:7px 14px; font:inherit; font-size:14px; cursor:pointer; }
   .tabs button.on { background:var(--bar-ink); color:var(--bar); }
   main { max-width:760px; margin:0 auto; padding:16px; }
@@ -32,13 +35,25 @@
 <header><div class="bar">
   <div><h1 id="title">Handwritten Assignments</h1><small id="sub"></small></div>
   <div class="tabs" id="tabs"></div>
-  <a href="/cover" style="color:inherit;font-size:13px;opacity:.85">Cover page maker →</a>
+  
 </div></header>
 <main id="main"></main>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 let sets = [], si = 0, who = 0;
+
+// "19 October, 2026" -> "19-10-2026"
+function shortDate(t) { const d = new Date(t); if (isNaN(d)) return t; const p = (n) => String(n).padStart(2, "0"); return `${p(d.getDate())}-${p(d.getMonth() + 1)}-${d.getFullYear()}`; }
+// link to the cover page maker, prefilled with this student's details (every field is editable in the URL)
+function coverHref(set, s) {
+  const c = set.cover || {};
+  const q = new URLSearchParams({ title: set.title, course: c.courseTitle || "", code: c.courseCode || "", term: c.term || "", batch: s.batchLabel || "", assignment: set.title,
+    date: shortDate(s.date), teacher: c.instructor || "", role: c.instructorRole || "", dept: c.dept || "", university: c.university || "", city: c.city || "",
+    id: s.roll, name: s.name, file: s.fileName.replace(/\.pdf$/, "-COVER") });
+  for (const [k, v] of [...q]) if (!v) q.delete(k);
+  return "/cover?" + q.toString();
+}
 
 function render() {
   const set = sets[si];
@@ -48,13 +63,14 @@ function render() {
   $("sub").textContent = set.course;
   $("tabs").innerHTML = (sets.length > 1
     ? '<select id="set">' + sets.map((x, i) => `<option value="${i}" ${i === si ? "selected" : ""}>${esc(x.title)}</option>`).join("") + "</select>" : "")
-    + set.students.map((st, i) => `<button class="${i === who ? "on" : ""}" data-i="${i}">${esc(st.name)}</button>`).join("");
+    + set.students.map((st, i) => `<span class="item"><button class="${i === who ? "on" : ""}" data-i="${i}">${esc(st.name)}</button><a class="cv" href="${esc(coverHref(set, st))}" target="_blank" rel="noreferrer">Cover page</a></span>`).join("");
   $("main").innerHTML = `
     <div class="meta">
       <p>Roll ${esc(s.roll)}<br>Section ${esc(s.section)} · ${esc(s.date)} · ${s.pages} pages</p>
       <div class="actions">
         <a class="pdf" href="${s.pdf}" download="${esc(s.fileName)}">⬇ Download as PDF</a>
         <a class="alt" href="${s.pdf}" target="_blank" rel="noreferrer">Open PDF</a>
+        <a class="alt" href="${esc(coverHref(set, s))}" target="_blank" rel="noreferrer">Cover page</a>
       </div>
     </div>` + s.images.map((src, i) => `<figure><img loading="lazy" src="${src}" alt="${esc(s.name)}, page ${i + 1} of ${s.pages}"></figure>`).join("");
   $("tabs").onclick = (e) => { const b = e.target.closest("button"); if (b) { who = +b.dataset.i; render(); } };

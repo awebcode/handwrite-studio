@@ -639,7 +639,17 @@ async function main() {
   mkdirSync(OUT, { recursive: true });
   mkdirSync(RAW, { recursive: true });
   const browser = await launch();
-  const manifest = { course: assignment.courseCode, title: assignment.title, students: [] };
+  const manifest = {
+    course: assignment.courseCode,
+    title: assignment.title,
+    // used by the cover-page links in the preview
+    cover: {
+      courseTitle: assignment.course, courseCode: assignment.courseCode, term: assignment.term,
+      university: assignment.university, dept: assignment.dept, city: assignment.city || "",
+      instructor: assignment.instructor || "Teacher Name", instructorRole: assignment.instructorRole || "Lecturer",
+    },
+    students: [],
+  };
   try {
     for (const profile of profiles) {
       const student = compile(assignment, profile);
@@ -669,6 +679,7 @@ async function main() {
         pages: specPages.length,
         pdf: `${urlBase}/${fileName}`,
         fileName,
+        batchLabel: student.batchLabel || student.batch || "",
         images: specPages.map((_, i) => `${urlBase}/${student.id}/${String(i + 1).padStart(2, "0")}.jpg`),
       });
     }
