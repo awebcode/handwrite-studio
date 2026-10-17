@@ -33,7 +33,10 @@ async function clientExport(kind) {
 }
 const fileBase = () => ($("fname").value || "cover-page").replace(/[^\w.-]+/g, "_");
 function download(blob, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+// The local preview server can render with real Chromium; static hosting (Cloudflare Pages) cannot, so it uses the in-browser export.
+const hasServer = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 async function serverExport(kind) {
+  if (!hasServer) throw new Error("no server");
   const r = await fetch("/api/cover/" + kind, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ html: exportHtml() }) });
   if (!r.ok) throw new Error("export failed " + r.status);
   download(await r.blob(), fileBase() + "." + kind);

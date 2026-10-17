@@ -2,7 +2,7 @@
 // Fields: doc, images, proj, sel, tab, zoom, layout, hist + revision counters that drive re-renders.
 import { createStore } from "../../../vendor/zustand-vanilla.mjs";
 import { createHistory } from "../../shared/history.js";
-import { debounce } from "../../shared/dom.js";
+import { debounce, throttle } from "../../shared/dom.js";
 import { saveProject, lsSet } from "../../shared/storage.js";
 
 /** doc = { meta, style, blocks }, images = { imgId: dataUrl }, proj = { id, name } */
@@ -32,11 +32,11 @@ const usedImages = () => {
   const ids = new Set(S.doc.blocks.map((b) => b.imgId).filter(Boolean));
   return Object.fromEntries([...ids].filter((i) => S.images[i]).map((i) => [i, S.images[i]]));
 };
-export const persist = debounce(async () => {
+export const persist = throttle(async () => {
   if (!S.proj) return;
   await saveProject({ id: S.proj.id, name: S.proj.name, updated: Date.now(), doc: S.doc, images: usedImages() });
   bump("saved");
-}, 600);
+}, 1000);
 
 const commitNow = () => { if (history.push(JSON.stringify(S.doc))) persist(); };
 const commitSoon = debounce(commitNow, 500);

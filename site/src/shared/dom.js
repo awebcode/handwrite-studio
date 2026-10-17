@@ -21,6 +21,15 @@ export function debounce(fn, ms = 250) {
   return run;
 }
 
+/** Run at most once per `ms` while calls keep coming (trailing edge), so long edits still save regularly. */
+export function throttle(fn, ms = 1000) {
+  let t = null, last = 0, args;
+  const fire = () => { t = null; last = Date.now(); fn(...args); };
+  const run = (...a) => { args = a; const wait = ms - (Date.now() - last); if (wait <= 0) { clearTimeout(t); fire(); } else if (!t) t = setTimeout(fire, wait); };
+  run.flush = () => { if (t) { clearTimeout(t); fire(); } };
+  return run;
+}
+
 /** Delegated event: on(root, "click", "[data-act]", (event, matchedElement) => ...) */
 export function on(root, type, selector, fn) {
   root.addEventListener(type, (e) => {

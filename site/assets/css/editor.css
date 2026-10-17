@@ -8,7 +8,9 @@ body.app { height: 100vh; display: flex; flex-direction: column; overflow: hidde
 .btn:hover { border-color: var(--acc); }
 #topbar select { width: auto; }
 #layout { flex: 1; display: grid; grid-template-columns: 380px 1fr; min-height: 0; }
+#side, #stage { min-width: 0; }
 #side { display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); min-height: 0; }
+.palette { max-width: 100%; }
 #tabs { display: flex; border-bottom: 1px solid var(--line); }
 #tabs button { flex: 1; border: 0; border-radius: 0; padding: 10px 4px; border-bottom: 2px solid transparent; }
 #tabs button.on { border-bottom-color: var(--acc); color: var(--acc); font-weight: 650; }
@@ -42,7 +44,7 @@ textarea.mono, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; fo
 .fl { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; } .fl img { width: 100%; box-shadow: var(--shadow); }
 .fatal { padding: 20px; color: var(--danger); }
 @media (max-width: 860px) {
-  body.app { height: auto; overflow: auto; } #layout { grid-template-columns: 1fr; }
+  body.app { height: auto; overflow: auto; } #layout { grid-template-columns: minmax(0, 1fr); }
   #side { max-height: 55vh; border-right: 0; border-bottom: 1px solid var(--line); } #stage { padding: 10px 4px; }
   #pname-top { width: 130px; } .zoom { display: none; }
 }
