@@ -24,10 +24,23 @@ async function run(mode, fn) {
 }
 const safe = async (fn, fallback) => { try { return await fn(); } catch { return fallback(); } };
 
-export const saveProject = (rec) => safe(() => run("readwrite", (s) => s.put(rec)), () => void mem.set(rec.id, rec));
-export const loadProject = (id) => safe(() => run("readonly", (s) => s.get(id)), () => mem.get(id));
-export const listProjects = () => safe(() => run("readonly", (s) => s.getAll()), () => [...mem.values()]);
-export const deleteProject = (id) => safe(() => run("readwrite", (s) => s.delete(id)), () => void mem.delete(id));
+const IMG = ":img"; // images live in their own record so text edits never rewrite them
+const hasDoc = (r) => r && r.doc;
+/** Saves the project; images are written only when passed (they change rarely and are large). */
+export async function saveProject(rec) {
+  const { images, ...meta } = rec;
+  await safe(() => run("readwrite", (s) => s.put(meta)), () => void mem.set(meta.id, meta));
+  if (images) await safe(() => run("readwrite", (s) => s.put({ id: rec.id + IMG, images })), () => void mem.set(rec.id + IMG, { images }));
+}
+export async function loadProject(id) {
+  const [meta, im] = await Promise.all([safe(() => run("readonly", (s) => s.get(id)), () => mem.get(id)), safe(() => run("readonly", (s) => s.get(id + IMG)), () => mem.get(id + IMG))]);
+  return meta && { ...meta, images: im?.images || meta.images || {} };
+}
+export const listProjects = async () => (await safe(() => run("readonly", (s) => s.getAll()), () => [...mem.values()])).filter(hasDoc);
+export const deleteProject = async (id) => {
+  await safe(() => run("readwrite", (s) => s.delete(id)), () => void mem.delete(id));
+  await safe(() => run("readwrite", (s) => s.delete(id + IMG)), () => void mem.delete(id + IMG));
+};
 
 export const lsGet = (k, d = null) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 export const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage full or blocked */ } };

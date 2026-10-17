@@ -27,7 +27,7 @@ function blockHtml(b) {
     h += b.rows.map((r, ri) => "<tr>" + r.map((x, c) => `<td data-r="${ri}" data-c="${c}" style="font-size:${(b.rowSize * S.page.scale).toFixed(1)}px;padding:${(b.rowH || 6) + 2}px 8px;${b.boldLast && c === cs - 1 ? "font-weight:700;" : ""}"><div contenteditable="true" spellcheck="false">${x}</div></td>`).join("") + "</tr>").join("") + "</tbody></table>";
     inner = h;
   }
-  return `<div class="blk${sel === b.id ? " sel" : ""}" data-id="${b.id}" style="margin-top:${mt}px;margin-bottom:${b.type === "logo" && b.mb == null ? 0 : mb}px"><span class="grip ui" draggable="true" title="Drag to reorder">⋮⋮</span>${inner}</div>`;
+  return `<div class="blk${sel === b.id ? " sel" : ""}" data-id="${b.id}" style="margin-top:${mt}px;margin-bottom:${b.type === "logo" && b.mb == null ? 0 : mb}px"><span class="grip ui" title="Drag to reorder">⋮⋮</span>${inner}</div>`;
 }
 function applyPage() {
   const p = S.page, sh = $("sheet");
@@ -44,7 +44,7 @@ function applyPage() {
 function render() {
   applyPage();
   $("sheet").innerHTML = `<div class="frame"></div><div class="inner" style="justify-content:${S.page.just}">` + S.blocks.map(blockHtml).join("") + "</div>";
-  bind(); syncPanel(); checkOverflow(); updateBubble();
+  bind(); attachDnd(); syncPanel(); checkOverflow(); updateBubble();
 }
 function checkOverflow() {
   const inner = $("sheet").querySelector(".inner"); if (!inner) return;
@@ -68,26 +68,8 @@ function bind() {
       c.firstChild.addEventListener("input", () => { (r < 0 ? b.headers : b.rows[r])[k] = c.firstChild.innerHTML; saveSoon(); });
     });
     el.querySelectorAll("[data-act=pick]").forEach((x) => x.addEventListener("click", (e) => { e.stopPropagation(); pickLogo(b.id); }));
-    const g = el.querySelector(".grip");
-    g.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/x-block", b.id); e.dataTransfer.effectAllowed = "move"; });
-    el.addEventListener("dragover", (e) => {
-      if (![...e.dataTransfer.types].includes("text/x-block")) return;
-      e.preventDefault(); clearDrop();
-      const r = el.getBoundingClientRect(); el.classList.add(e.clientY < r.top + r.height / 2 ? "dropbefore" : "dropafter");
-    });
-    el.addEventListener("dragleave", () => el.classList.remove("dropbefore", "dropafter"));
-    el.addEventListener("drop", (e) => {
-      const from = e.dataTransfer.getData("text/x-block"); if (!from) return;
-      e.preventDefault(); e.stopPropagation();
-      const after = el.classList.contains("dropafter"); clearDrop();
-      const fb = blockById(from); if (!fb || fb.id === b.id) return;
-      S.blocks.splice(S.blocks.indexOf(fb), 1);
-      S.blocks.splice(S.blocks.indexOf(b) + (after ? 1 : 0), 0, fb);
-      render(); save();
-    });
   });
 }
-const clearDrop = () => document.querySelectorAll(".dropbefore,.dropafter").forEach((e) => e.classList.remove("dropbefore", "dropafter"));
 function select(i, rerender) {
   if (sel === i && !rerender) return;
   sel = i;

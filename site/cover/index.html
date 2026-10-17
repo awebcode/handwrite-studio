@@ -37,6 +37,7 @@
 </head>
 <body>
 <div id="topbar">
+  <a class="navl" href="/" title="Home">⌂</a><a class="navl" href="/editor/" title="Back to the editor">✎ Editor</a>
   <button id="bUndo" title="Undo (Ctrl+Z)" disabled>↶</button><button id="bRedo" title="Redo (Ctrl+Shift+Z / Ctrl+Y)" disabled>↷</button>
   <input type="text" id="fname" value="cover-page" title="File name" aria-label="File name">
   <select id="fmt" title="Download format" aria-label="Download format"><option value="png">PNG</option><option value="pdf">PDF</option></select>
@@ -137,6 +138,7 @@
 <script src="/src/features/cover/render.js"></script>
 <script src="/src/features/cover/bubble.js"></script>
 <script src="/src/features/cover/panel.js"></script>
+<script src="/src/features/cover/dnd.js"></script>
 <script src="/src/features/cover/export.js"></script>
 </body>
 </html>

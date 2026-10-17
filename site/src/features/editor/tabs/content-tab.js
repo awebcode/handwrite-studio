@@ -1,8 +1,9 @@
 // Content tab: palette of blocks to add + the draggable list of blocks with inline editors.
-import { esc, on as delegate } from "../../../shared/dom.js";
+import { esc } from "../../../shared/dom.js";
 import { KINDS } from "../../handwriting/engine/constants.js";
 import { S, select } from "../state.js";
-import { addBlock, deleteBlock, duplicateBlock, moveBlock, reorder } from "../actions.js";
+import { addBlock, deleteBlock, duplicateBlock, moveBlock, moveTo } from "../actions.js";
+import { createDnd } from "../../../shared/dnd.js";
 import { blockForm } from "../blocks/forms.js";
 import { tableActs } from "../blocks/table-form.js";
 import { shotActs } from "../blocks/shot-form.js";
@@ -26,7 +27,7 @@ function card(b, i, n) {
   const sel = b.id === S.sel;
   return `<div class="card${sel ? " sel" : ""}" data-id="${b.id}">
     <div class="chead" data-act="pick">
-      <span class="grip" draggable="true" title="Drag to reorder">⋮⋮</span><b>${label(b)}</b><span class="snip">${snippet(b)}</span>
+      <span class="grip" title="Drag the card to reorder" aria-hidden="true">⋮⋮</span><b>${label(b)}</b><span class="snip">${snippet(b)}</span>
       <span class="cacts"><button class="btn-sm btn-ghost" data-act="up" title="Move up"${i ? "" : " disabled"}>↑</button><button class="btn-sm btn-ghost" data-act="down" title="Move down"${i < n - 1 ? "" : " disabled"}>↓</button><button class="btn-sm btn-ghost" data-act="dup" title="Duplicate">⧉</button><button class="btn-sm btn-ghost btn-danger" data-act="del" title="Delete">🗑</button></span>
     </div>${sel ? `<div class="cbody">${blockForm(b)}</div>` : ""}</div>`;
 }
@@ -45,17 +46,15 @@ export const acts = {
   del: (t, e) => (e.stopPropagation(), deleteBlock(idOf(t))),
 };
 
-export function init(body) {
-  let drag = null;
-  body.addEventListener("dragstart", (e) => { const g = e.target.closest?.(".grip"); if (g) { drag = idOf(g); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", drag); } });
-  const clear = () => body.querySelectorAll(".dropbefore,.dropafter").forEach((c) => c.classList.remove("dropbefore", "dropafter"));
-  delegate(body, "dragover", ".card", (e, c) => {
-    if (!drag) return; e.preventDefault(); clear();
-    const r = c.getBoundingClientRect(); c.classList.add(e.clientY < r.top + r.height / 2 ? "dropbefore" : "dropafter");
+let dnd;
+/** (Re)attach drag and drop after every render: grips reorder the cards, palette chips can be dropped between them. */
+export function after(body) {
+  dnd ||= createDnd({
+    onReorder: (from, to) => moveTo(from, to),
+    onDropNew: (data, at) => { const [type, kind] = data.add.split(":"); addBlock(type, kind, at); },
+    onStart: () => body.classList.add("dragging"), onEnd: () => body.classList.remove("dragging"),
   });
-  delegate(body, "drop", ".card", (e, c) => {
-    if (!drag) return; e.preventDefault();
-    const after = c.classList.contains("dropafter"); clear(); reorder(drag, c.dataset.id, after); drag = null;
-  });
-  body.addEventListener("dragend", () => { drag = null; clear(); });
+  dnd.reset();
+  body.querySelectorAll(".card").forEach((c, i) => dnd.sortable(c, { id: c.dataset.id, index: i }));
+  body.querySelectorAll(".palette [data-add]").forEach((b) => dnd.draggable(b, { id: "pal:" + b.dataset.add, data: { add: b.dataset.add } }));
 }

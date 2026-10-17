@@ -20,15 +20,18 @@
   <span id="saved" class="mute"></span><span id="busy-dot" class="mute" hidden>rendering…</span>
   <span class="grow"></span>
   <label class="zoom" title="Zoom">🔍<input id="zoom" type="range" min="0.3" max="1.2" step="0.05" value="0.6"></label>
-  <a class="btn" href="/cover/">Cover page</a>
+  <a class="btn" id="bCover" href="/cover/" title="Make a cover page with these details">Cover page</a>
   <button id="bFinal">Final look</button>
   <select id="fmt" aria-label="Download format"><option value="pdf">PDF</option><option value="png">PNG zip</option><option value="jpg">JPG zip</option></select>
   <button id="bDownload" class="btn-pri" disabled>⬇ Download</button>
 </header>
-<main id="layout">
+<main id="layout" data-view="edit">
   <aside id="side"><nav id="tabs"></nav><div id="sidebody"></div></aside>
   <section id="stage"><div id="pages"></div></section>
 </main>
+<nav id="mnav" aria-label="Editor views">
+  <button data-view="edit" class="on">✎ Edit</button><button data-view="pages">📄 Pages</button><button data-view="add" class="btn-pri">＋ Add</button>
+</nav>
 <div id="overlay" class="overlay"></div>
 <script type="module" src="/src/features/editor/main.js"></script>
 </body>

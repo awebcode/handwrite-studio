@@ -7,7 +7,7 @@ import { saveProject, lsSet } from "../../shared/storage.js";
 
 /** doc = { meta, style, blocks }, images = { imgId: dataUrl }, proj = { id, name } */
 export const store = createStore(() => ({
-  doc: null, images: {}, proj: null, sel: null, tab: "content", zoom: 0.6, layout: null,
+  doc: null, images: {}, proj: null, scrollTo: null, sel: null, tab: "content", zoom: 0.6, layout: null,
   hist: { canUndo: false, canRedo: false }, selSource: null,
   rev: { structure: 0, content: 0, project: 0, saved: 0, layout: 0 },
 }));
@@ -32,10 +32,13 @@ const usedImages = () => {
   const ids = new Set(S.doc.blocks.map((b) => b.imgId).filter(Boolean));
   return Object.fromEntries([...ids].filter((i) => S.images[i]).map((i) => [i, S.images[i]]));
 };
+let savedImages = "";
+/** Throttled autosave: at most one write per second; images are rewritten only when they actually changed. */
 export const persist = throttle(async () => {
   if (!S.proj) return;
-  await saveProject({ id: S.proj.id, name: S.proj.name, updated: Date.now(), doc: S.doc, images: usedImages() });
-  bump("saved");
+  const images = usedImages(), sig = Object.keys(images).sort().join();
+  await saveProject({ id: S.proj.id, name: S.proj.name, updated: Date.now(), doc: S.doc, ...(sig !== savedImages ? { images } : {}) });
+  savedImages = sig; bump("saved");
 }, 1000);
 
 const commitNow = () => { if (history.push(JSON.stringify(S.doc))) persist(); };
@@ -58,7 +61,7 @@ export function redo() { commitSoon.flush(); const j = history.redo(); if (j) re
 
 export function load(doc, images, proj) {
   set({ doc, images: images || {}, proj, sel: null });
-  history.reset(JSON.stringify(doc));
+  history.reset(JSON.stringify(doc)); savedImages = Object.keys(usedImages()).sort().join();
   lsSet("hw.current", proj.id);
   bump("structure"); bump("project");
 }

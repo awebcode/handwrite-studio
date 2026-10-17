@@ -65,17 +65,17 @@ npm install
 npm run dev          # http://localhost:8080  (editor at /editor/, cover at /cover/)
 ```
 
-### Deploy to Cloudflare Pages
+### Deploy to Cloudflare (Workers static assets)
 
-`wrangler.jsonc` points Pages at `./site`, and `site/_headers` sets the security headers and caching.
+`wrangler.jsonc` serves the static `./site` folder (no Worker code), and `site/_headers` sets the security headers and caching.
 
 ```bash
 npm run vendor       # refresh site/vendor from node_modules (already committed)
-npm run cf:dev       # local Pages preview
-npm run cf:deploy    # wrangler pages deploy site
+npm run cf:dev       # local preview with the real headers
+npm run cf:deploy    # wrangler deploy
 ```
 
-Or connect the repo in the Cloudflare dashboard: build command empty, output directory `site`.
+Or connect the repo in the Cloudflare dashboard (Workers & Pages -> Import a repository): build command empty, deploy command `npx wrangler deploy` (the default).
 
 ## Cover page maker
 

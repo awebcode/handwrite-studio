@@ -43,9 +43,19 @@ textarea.mono, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; fo
 .fl-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .fl { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; } .fl img { width: 100%; box-shadow: var(--shadow); }
 .fatal { padding: 20px; color: var(--danger); }
+.card { cursor: grab; touch-action: manipulation; } .card input, .card textarea, .card select, .card button { cursor: auto; } .chead { cursor: grab; }
+.grip { padding: 2px 4px; pointer-events: none; } .palette [data-add] { cursor: grab; }
+.card[data-dnd-dragging], [data-dnd-dragging] { opacity: .9; box-shadow: var(--shadow); z-index: 60; }
+body.dragging { user-select: none; } body.dragging .card { transition: transform .15s; }
+.rzh { position: absolute; right: -9px; bottom: -9px; width: 20px; height: 20px; border-radius: 50%; background: var(--focus); border: 3px solid #fff; cursor: nwse-resize; box-shadow: 0 1px 6px rgba(0,0,0,.4); touch-action: none; z-index: 9; }
+#mnav { display: none; }
 @media (max-width: 860px) {
-  body.app { height: auto; overflow: auto; } #layout { grid-template-columns: minmax(0, 1fr); }
-  #side { max-height: 55vh; border-right: 0; border-bottom: 1px solid var(--line); } #stage { padding: 10px 4px; }
-  #pname-top { width: 130px; } .zoom { display: none; }
+  body.app { height: 100dvh; overflow: hidden; } #layout { grid-template-columns: minmax(0, 1fr); padding-bottom: 54px; }
+  #layout[data-view="edit"] #stage, #layout[data-view="pages"] #side, #layout[data-view="add"] #stage { display: none; }
+  #side { border-right: 0; max-height: none; } #stage { padding: 10px 4px; }
+  #topbar { flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding: 6px 8px; } #topbar > * { flex: none; }
+  .brand { font-size: 0; } .brand::before { content: "✎"; font-size: 20px; } #pname-top { width: 120px; } .zoom, #saved { display: none; }
+  #mnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--panel); border-top: 1px solid var(--line); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); gap: 8px; }
+  #mnav button { flex: 1; padding: 10px 4px; font-weight: 600; } #mnav button.on { border-color: var(--acc); color: var(--acc); }
+  .btn-sm { padding: 7px 10px; } .cacts button { padding: 6px 9px; } .grip { padding: 8px 8px; }
 }
-.grid { width: 100%; border-collapse: collapse; } .grid td { padding: 2px; } .grid input { padding: 4px; }

@@ -1,10 +1,11 @@
 // The centre column: paginated handwritten pages, live zoom, click-to-select and drop/paste of images.
-import { $, debounce, el } from "../../shared/dom.js";
+import { $, throttle, el } from "../../shared/dom.js";
 import { acceptImages } from "../../shared/images.js";
 import { A4W, A4H } from "../handwriting/engine/constants.js";
 import { layout } from "../handwriting/engine/layout.js";
 import { S, on, select, emit } from "./state.js";
 import { placeImage } from "./actions.js";
+import { attachResize } from "./resize.js";
 
 let token = 0, host;
 
@@ -18,6 +19,7 @@ function frame(page, i, n) {
 function highlight() {
   host.querySelectorAll(".selhl").forEach((e) => e.classList.remove("selhl"));
   if (S.sel) host.querySelectorAll(`[data-bid="${S.sel}"]`).forEach((e) => e.classList.add("selhl"));
+  attachResize(host);
 }
 
 function rezoom() {
@@ -32,6 +34,7 @@ async function render() {
   S.layout = res;
   host.replaceChildren(...res.pages.map((p, i) => frame(p, i, res.pages.length)));
   highlight(); $("#busy-dot").hidden = true;
+  if (S.scrollTo) { const id = S.scrollTo; S.scrollTo = null; scrollToBlock(id); }
   emit("layout");
 }
 
@@ -43,9 +46,9 @@ export function scrollToBlock(id) {
 
 export function initPreview() {
   host = $("#pages");
-  const soon = debounce(render, 160);
+  const soon = throttle(render, 220); // typing shows up live, but layout runs at most ~4x a second
   on("structure", soon); on("content", soon); on("select", highlight); on("zoom", rezoom);
   host.addEventListener("click", (e) => { const t = e.target.closest("[data-bid]"); if (t) select(t.dataset.bid, "preview"); });
   acceptImages($("#stage"), (files) => files.forEach((f) => placeImage(f)));
-  soon.flush();
+  render();
 }

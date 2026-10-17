@@ -47,3 +47,8 @@
   .hint-drop { outline:3px dashed var(--ui-acc); outline-offset:-6px; }
   @media (max-width: 900px) { body { flex-direction:column; } #panel { width:100%; height:auto; position:static; border-right:0; border-bottom:1px solid var(--ui-line); } }
   @media print { #panel, #topbar, #bubble, #toast, #over { display:none !important; } body { background:#fff; display:block; } #stagewrap { padding:0; display:block; overflow:visible; } #stage { width:auto !important; height:auto !important; } #sheet { transform:none !important; box-shadow:none !important; } .ui { display:none !important; } @page { size:A4; margin:0; } }
+  #topbar .navl { padding: 6px 10px; border: 1px solid var(--ui-line); border-radius: 7px; text-decoration: none; color: inherit; font-size: 14px; white-space: nowrap; }
+  #topbar .navl:hover { border-color: var(--ui-acc); }
+  .blk .grip { pointer-events: none; } .blk { cursor: grab; } .blk .t { cursor: text; }
+  .blk[data-dnd-dragging] { opacity: .85; }
+  @media (max-width: 900px) { #stagewrap { order: -1; max-height: 70vh; padding: 8px; } #topbar { order: -2; } }

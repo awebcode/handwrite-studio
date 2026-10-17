@@ -18,11 +18,11 @@ const FACTORY = {
 
 const indexOf = (id) => S.doc.blocks.findIndex((b) => b.id === id);
 
-export function addBlock(type, kind) {
+export function addBlock(type, kind, index) {
   const b = FACTORY[type](kind);
-  const at = S.sel ? indexOf(S.sel) + 1 : S.doc.blocks.length;
+  const at = index ?? (S.sel ? indexOf(S.sel) + 1 : S.doc.blocks.length);
   S.doc.blocks.splice(at, 0, b);
-  S.sel = b.id; structure();
+  S.sel = b.id; S.scrollTo = b.id; structure();
   return b;
 }
 export function deleteBlock(id) {
@@ -40,11 +40,10 @@ export function moveBlock(id, delta) {
   if (i < 0 || j < 0 || j >= S.doc.blocks.length) return;
   const [b] = S.doc.blocks.splice(i, 1); S.doc.blocks.splice(j, 0, b); structure();
 }
-export function reorder(fromId, toId, after) {
-  const from = blockById(fromId), to = blockById(toId);
-  if (!from || !to || from === to) return;
-  S.doc.blocks.splice(indexOf(fromId), 1);
-  S.doc.blocks.splice(indexOf(toId) + (after ? 1 : 0), 0, from); structure();
+export function moveTo(from, to) {
+  const blocks = S.doc.blocks;
+  if (from === to || from < 0 || to < 0 || from >= blocks.length || to >= blocks.length) return;
+  const [b] = blocks.splice(from, 1); blocks.splice(to, 0, b); S.sel = b.id; structure();
 }
 
 export function applyHeader(preset) {

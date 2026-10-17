@@ -8,3 +8,8 @@ for (const [from, to] of [
   ["node_modules/zustand/esm/vanilla.mjs", "zustand-vanilla.mjs"],
 ]) cpSync(from, "site/vendor/" + to);
 console.log("vendor files updated");
+
+// dnd-kit's framework-free packages are several modules; bundle them once into a single file.
+import { build } from "esbuild";
+await build({ entryPoints: ["scripts/dnd-entry.mjs"], bundle: true, format: "esm", minify: true, target: "es2022", outfile: "site/vendor/dnd-kit.js", legalComments: "none" });
+console.log("bundled dnd-kit");

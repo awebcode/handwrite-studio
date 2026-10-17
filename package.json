@@ -15,8 +15,8 @@
     "cover": "node tools/hwbuild/preview.mjs",
     "dev": "node tools/hwbuild/preview.mjs",
     "vendor": "node scripts/vendor.mjs",
-    "cf:dev": "npx wrangler pages dev site",
-    "cf:deploy": "npx wrangler pages deploy site --project-name=handwrite-studio"
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy"
   },
   "dependencies": {
     "playwright": "^1.62.0"
@@ -25,9 +25,13 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@dnd-kit/dom": "^0.5.1",
+    "@dnd-kit/helpers": "^0.5.1",
+    "esbuild": "^0.28.2",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
+    "wrangler": "^4.151.1",
     "zustand": "^5.0.15"
   }
 }
