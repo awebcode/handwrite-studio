@@ -8,5 +8,7 @@ function fixTable(b) {
   const n = headers.length;
   let rows = Array.isArray(b.rows) && b.rows.length ? b.rows.slice(0, 40) : [[]];
   rows = rows.map((r) => Array.from({ length: n }, (_, c) => (blank(r?.[c]) ? "" : r[c])));
-  return Object.assign(b, { headers, rows });
+  // a zero or missing size would make the text invisible (font-size 0), so fall back to readable defaults
+  const size = (v, d) => (Number.isFinite(+v) && +v >= 8 ? +v : d);
+  return Object.assign(b, { headers, rows, headSize: size(b.headSize, 13), rowSize: size(b.rowSize, 17) });
 }

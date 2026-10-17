@@ -1,7 +1,7 @@
 /* ---------- render ---------- */
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function textStyle(b) {
-  const sc = S.page.scale;
+  const sc = S.page.scale > 0 ? S.page.scale : 1;
   return `font-size:${(b.size * sc).toFixed(2)}px;font-weight:${b.bold ? 700 : 400};font-style:${b.italic ? "italic" : "normal"};text-decoration:${b.under ? "underline" : "none"};text-align:${b.align};line-height:${b.lh};letter-spacing:${b.ls}px;` +
     (b.color ? `color:${b.color};` : "") + (b.font ? `font-family:${b.font};` : "");
 }
@@ -21,11 +21,11 @@ function blockHtml(b) {
   else if (b.type === "spacer") inner = `<div style="height:${b.h}px"></div>`;
   else if (b.type === "table") {
     fixTable(b);
-    const cs = b.headers.length;
+    const cs = b.headers.length, scale = S.page.scale > 0 ? S.page.scale : 1;
     const w = b.w, colw = (w / cs).toFixed(1);
     let h = `<table class="tb" style="width:${w}px"><colgroup>${b.headers.map(() => `<col style="width:${colw}px">`).join("")}</colgroup><thead><tr>`;
-    h += b.headers.map((x, c) => `<th data-r="-1" data-c="${c}" style="font-size:${(b.headSize * S.page.scale).toFixed(1)}px;padding:${b.rowH || 6}px 8px"><div contenteditable="true" spellcheck="false" data-ph="Column ${c + 1}">${x}</div></th>`).join("") + "</tr></thead><tbody>";
-    h += b.rows.map((r, ri) => "<tr>" + r.map((x, c) => `<td data-r="${ri}" data-c="${c}" style="font-size:${(b.rowSize * S.page.scale).toFixed(1)}px;padding:${(b.rowH || 6) + 2}px 8px;${b.boldLast && c === cs - 1 ? "font-weight:700;" : ""}"><div contenteditable="true" spellcheck="false" data-ph="Type here">${x}</div></td>`).join("") + "</tr>").join("") + "</tbody></table>";
+    h += b.headers.map((x, c) => `<th data-r="-1" data-c="${c}" style="font-size:${(b.headSize * scale).toFixed(1)}px;padding:${b.rowH || 6}px 8px"><div contenteditable="true" spellcheck="false" data-ph="Column ${c + 1}">${x}</div></th>`).join("") + "</tr></thead><tbody>";
+    h += b.rows.map((r, ri) => "<tr>" + r.map((x, c) => `<td data-r="${ri}" data-c="${c}" style="font-size:${(b.rowSize * scale).toFixed(1)}px;padding:${(b.rowH || 6) + 2}px 8px;${b.boldLast && c === cs - 1 ? "font-weight:700;" : ""}"><div contenteditable="true" spellcheck="false" data-ph="Type here">${x}</div></td>`).join("") + "</tr>").join("") + "</tbody></table>";
     inner = h;
   }
   return `<div class="blk${sel === b.id ? " sel" : ""}" data-id="${b.id}" style="margin-top:${mt}px;margin-bottom:${b.type === "logo" && b.mb == null ? 0 : mb}px"><span class="grip ui" title="Drag to reorder">⋮⋮</span>${inner}</div>`;

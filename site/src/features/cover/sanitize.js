@@ -15,6 +15,7 @@ function cleanHtml(html) {
 
 function cleanValue(key, v, base) {
   if (key === "html") return cleanHtml(v);
+  if (key === "scale" || key === "zoom") return Number.isFinite(+v) && +v >= 0.5 && +v <= 3 ? +v : base ?? 1;
   if (key === "src") return typeof v === "string" && (v === "" || /^data:image\/(png|jpe?g|gif|webp|svg\+xml)[;,]/.test(v)) && v.length < 6e6 ? v : "";
   if (key === "id") return ID.test(v) ? v : "b" + Math.random().toString(36).slice(2, 8);
   if (/color|accent|head|row|grid|paper|frameC$/i.test(key) || key === "color") return typeof v === "string" && (v === "" || COLOR.test(v)) ? v : base ?? "";
