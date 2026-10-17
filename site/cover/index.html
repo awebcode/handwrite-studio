@@ -37,6 +37,8 @@
 <link rel="stylesheet" href="/assets/css/cover-maker.css">
 <style id="sheetcss">
   .sheet { position:relative; width:794px; height:1122px; background:#fff; color:#000; box-sizing:border-box; overflow:visible; transform-origin:top left; box-shadow:0 2px 14px rgba(0,0,0,.18); font-family:var(--font); }
+  /* empty table cells show a readable hint while editing (export removes contenteditable, so it never prints) */
+  .sheet [contenteditable="true"]:empty::before { content: attr(data-ph); color: #6b7280; pointer-events: none; }
   .sheet .inner { position:absolute; inset:0; padding:var(--padv) var(--padh); display:flex; flex-direction:column; }
   .sheet .frame { position:absolute; inset:var(--frameInset); border:var(--frameW) solid var(--frameC); pointer-events:none; }
   .blk { position:relative; flex:none; }

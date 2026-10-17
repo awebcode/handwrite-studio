@@ -72,6 +72,7 @@ function addBlock(type) {
   else if (type === "spacer") b = { id: id(), type: "spacer", h: 30 };
   else if (type === "logo") b = { id: id(), type: "logo", src: "", w: 76, mb: 6, align: "center" };
   else b = { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: false, mt: 0, mb: 0, headers: ["Column 1", "Column 2"], rows: [["", ""]] };
+  if (type === "table") { b.headSize = 15; b.rowSize = 17; }
   const i = sel ? S.blocks.indexOf(cur()) + 1 : S.blocks.length;
   S.blocks.splice(i, 0, b); sel = b.id; render(); save();
 }
