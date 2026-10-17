@@ -67,7 +67,7 @@ export function after(body) {
   dnd ||= createDnd({
     onReorder: (from, to) => moveTo(from, to),
     onDropNew: (data, at) => { const [type, kind] = data.add.split(":"); addBlock(type, kind, at); },
-    onStart: () => body.classList.add("dragging"), onEnd: () => body.classList.remove("dragging"),
+    onStart: () => body.classList.add("dragging"), onEnd: () => { body.classList.remove("dragging"); document.dispatchEvent(new Event("dnd-end")); },
   });
   dnd.reset();
   body.querySelectorAll(".card").forEach((c, i) => dnd.sortable(c, { id: c.dataset.id, index: i }));

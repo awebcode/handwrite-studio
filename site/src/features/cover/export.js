@@ -62,7 +62,7 @@ $("bPrint").onclick = () => window.print();
 $("bSave").onclick = () => download(new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }), fileBase() + ".json");
 $("bLoad").onclick = () => $("fJson").click();
 $("fJson").onchange = (e) => e.target.files[0] && loadJson(e.target.files[0]);
-function loadJson(f) { const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (!d.blocks || !d.page) throw 0; S = d; sel = null; render(); save(); toast("Design loaded"); } catch (e) { toast("Not a valid design file"); } }; r.readAsText(f); }
+function loadJson(f) { const r = new FileReader(); r.onload = () => { try { S = sanitizeDesign(JSON.parse(r.result)); sel = null; render(); save(); toast("Design loaded"); } catch (e) { toast("Not a valid design file"); } }; r.readAsText(f); }
 $("bReset").onclick = () => { if (confirm("Reset the cover page to the default design?")) { S = defaults(); sel = null; render(); save(); } };
 $("bLink").onclick = () => {
   const t = (n) => (S.blocks.find((b) => b.key === n) || {}).html || "";
@@ -83,10 +83,11 @@ let tt; function toast(m) { const t = $("toast"); t.textContent = m; t.classList
 (async function boot() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
-  if (saved && saved.blocks && saved.page) S = saved;
+  if (saved) { try { S = sanitizeDesign(saved); } catch (e) { S = null; } }
+  if (S) { /* restored */ }
   else if (fromUrl) S = defaults(urlVals());
   else {
-    try { if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) throw 0; const r = await fetch("/cover/preset.local.json"); if (r.ok) { const d = await r.json(); if (d.blocks && d.page) S = d; } } catch (e) {}
+    try { if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) throw 0; const r = await fetch("/cover/preset.local.json"); if (r.ok) { const d = await r.json(); if (d.blocks && d.page) S = sanitizeDesign(d); } } catch (e) {}
   }
   if (!S) S = defaults();
   if (QP.get("file")) $("fname").value = QP.get("file");

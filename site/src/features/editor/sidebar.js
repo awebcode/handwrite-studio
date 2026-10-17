@@ -12,7 +12,9 @@ const TABS = { content, info, style, page, files };
 const LABELS = { content: "Content", info: "Info", style: "Style", page: "Page", files: "Files" };
 
 let tok = 0;
+let queued = false;
 async function renderBody() {
+  if ($("#sidebody").classList.contains("dragging")) { queued = true; return; } // never rebuild the cards under an active drag
   const body = $("#sidebody"), top = body.scrollTop, mine = ++tok, tab = S.tab;
   const html = await TABS[tab].html();
   if (mine !== tok) return; // a newer render started while this one waited
@@ -38,6 +40,7 @@ export function initSidebar() {
   bindForm(body, resolve, ({ el }) => (el.dataset.rerender ? structure() : touch()));
   delegate(body, "click", "[data-act]", (e, t) => { for (const m of Object.values(TABS)) m.acts?.[t.dataset.act]?.(t, e); });
   delegate($("#tabs"), "click", "[data-tab]", (e, t) => showTab(t.dataset.tab));
+  document.addEventListener("dnd-end", () => setTimeout(() => queued && ((queued = false), renderBody()), 0));
   on("structure", renderBody); on("select", (src) => { if (S.tab === "content" && src !== "form") renderBody(); });
   for (const m of Object.values(TABS)) m.init?.(body);
   renderBody();
