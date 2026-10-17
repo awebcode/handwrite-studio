@@ -1,0 +1,20 @@
+{
+  "name": "ai-hand-writing-generator",
+  "version": "1.0.0",
+  "description": "Turn typed assignment answers into realistic handwritten, scanned-looking A4 pages and a print-ready PDF per student.",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "hw:setup": "sh tools/hwbuild/setup.sh",
+    "hw:build": "node tools/hwbuild/build.mjs",
+    "hw:new": "node tools/hwbuild/new-assignment.mjs",
+    "hw:new-student": "node tools/hwbuild/new-student.mjs",
+    "hw:preview": "npm run hw:build && node tools/hwbuild/preview.mjs",
+    "hw:preview:fast": "node tools/hwbuild/preview.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.62.0"
+  },
+  "engines": { "node": ">=20" }
+}

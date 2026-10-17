@@ -1,0 +1,21 @@
+node_modules/
+.venv/
+__pycache__/
+*.log
+
+# generated output: page images, PDFs, intermediate renders, manifests
+public/
+tools/hwbuild/raw/
+*.pdf
+
+# private: your real assignments and students stay local
+# (only the made-up example + templates are committed)
+tools/hwbuild/assignments/*
+!tools/hwbuild/assignments/example/
+!tools/hwbuild/assignments/_template/
+tools/hwbuild/profiles/*.mjs
+!tools/hwbuild/profiles/alice.mjs
+!tools/hwbuild/profiles/bob.mjs
+!tools/hwbuild/profiles/_template.mjs
+.env
+.env.*
