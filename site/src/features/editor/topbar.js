@@ -21,11 +21,13 @@ export function initTopbar() {
   $("#bDownload").onclick = () => download(fmt.value);
   $("#bFinal").onclick = finalLook;
   $("#zoom").oninput = (e) => setZoom(+e.target.value);
-  name.oninput = () => rename(name.value);
+  const title = () => (document.title = `${S.proj.name} - Handwrite Studio`);
+  name.oninput = () => { rename(name.value); title(); };
   on("history", ({ canUndo, canRedo }) => { $("#bUndo").disabled = !canUndo; $("#bRedo").disabled = !canRedo; });
   const h = store.getState().hist; $("#bUndo").disabled = !h.canUndo; $("#bRedo").disabled = !h.canRedo;
   on("content", coverLink); on("structure", coverLink); coverLink();
-  on("project", () => { name.value = S.proj.name; $("#zoom").value = S.zoom; });
+  title();
+  on("project", () => { title(); name.value = S.proj.name; $("#zoom").value = S.zoom; });
   on("saved", () => { const s = $("#saved"); s.textContent = "Saved ✓"; clearTimeout(s.t); s.t = setTimeout(() => (s.textContent = ""), 1500); });
   on("layout", () => ($("#bDownload").disabled = false));
   document.addEventListener("keydown", (e) => {

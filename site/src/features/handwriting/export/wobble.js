@@ -12,12 +12,13 @@ export function wobble(canvas, amp, freq, R) {
   const w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
   const src = ctx.getImageData(0, 0, w, h), dst = ctx.createImageData(w, h), s = src.data, d = dst.data;
   const cell = Math.max(6, 1 / freq), gw = Math.ceil(w / cell) + 4, gh = Math.ceil(h / cell) + 4;
-  const nx = lattice(gw * gh, R), ny = lattice(gw * gh, R), nx2 = lattice(gw * gh, R), ny2 = lattice(gw * gh, R);
+  const gw2 = gw * 2, gh2 = gh * 2; // the second octave samples at 2x, so its lattice must be 2x too
+  const nx = lattice(gw * gh, R), ny = lattice(gw * gh, R), nx2 = lattice(gw2 * gh2, R), ny2 = lattice(gw2 * gh2, R);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const u = x / cell, v = y / cell;
-      const dx = amp * (noise(nx, gw, u, v) * 0.7 + noise(nx2, gw, u * 2, v * 2) * 0.3);
-      const dy = amp * (noise(ny, gw, u, v) * 0.7 + noise(ny2, gw, u * 2, v * 2) * 0.3);
+      const dx = amp * (noise(nx, gw, u, v) * 0.7 + noise(nx2, gw2, u * 2, v * 2) * 0.3);
+      const dy = amp * (noise(ny, gw, u, v) * 0.7 + noise(ny2, gw2, u * 2, v * 2) * 0.3);
       const sx = Math.min(w - 1.001, Math.max(0, x + dx)), sy = Math.min(h - 1.001, Math.max(0, y + dy));
       const x0 = sx | 0, y0 = sy | 0, fx = sx - x0, fy = sy - y0, i = (y0 * w + x0) * 4, o = (y * w + x) * 4;
       const w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;

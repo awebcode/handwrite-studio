@@ -67,6 +67,7 @@ createServer(async (req, res) => {
       return res.end(buf);
     }
     if (url === "/api/manifests") { res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(manifests())); }
+    if (url === "/cover/preset.local.json") return sendFile(res, path.join(root, "local/cover-preset.json"));
     if (url === "/api/ping") { res.writeHead(200, { "content-type": "application/json" }); return res.end('{"ok":true}'); }
     if (url === "/generated" || url === "/generated/") return sendFile(res, path.join(root, "preview/index.html"));
     const inSite = path.join(site, url);

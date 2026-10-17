@@ -2,12 +2,14 @@
 import { esc } from "../../../shared/dom.js";
 import { KINDS } from "../../handwriting/engine/constants.js";
 import { S, select } from "../state.js";
-import { addBlock, deleteBlock, duplicateBlock, moveBlock, moveTo } from "../actions.js";
+import { addBlock, deleteBlock, duplicateBlock, moveBlock, moveTo, insertBlocks } from "../actions.js";
 import { createDnd } from "../../../shared/dnd.js";
 import { blockForm } from "../blocks/forms.js";
 import { tableActs } from "../blocks/table-form.js";
 import { shotActs } from "../blocks/shot-form.js";
 import { scrollToBlock } from "../preview.js";
+import { parseRaw } from "../raw-text.js";
+import { toast } from "../../../shared/toast.js";
 
 const PALETTE = [
   ["text:question", "Question"], ["text:answer", "Answer"], ["text:point", "Point"], ["text:section", "Section"],
@@ -32,12 +34,19 @@ function card(b, i, n) {
     </div>${sel ? `<div class="cbody">${blockForm(b)}</div>` : ""}</div>`;
 }
 
-export const html = () => `<div class="palette">${PALETTE.map(([k, v]) => `<button class="btn-sm" data-act="add" data-add="${k}">+ ${v}</button>`).join("")}</div>
+const rawBox = `<details class="grp raw"><summary>Paste raw text</summary>
+  <p class="hint">Paste plain notes. <b>Q1.</b> question · <b>Ans.</b> answer · <b>- item</b> point · <b># Heading</b> section · <b>\`\`\`</b> code fence · <b>---</b> line · blank line = gap.</p>
+  <textarea id="rawtext" rows="7" class="mono" spellcheck="false" placeholder="# Part A&#10;Q1. What is an OS?&#10;Ans. It manages hardware.&#10;- Process management&#10;\`\`\`&#10;MOV AX, BX&#10;\`\`\`"></textarea>
+  <div class="btns"><button class="btn-sm btn-pri" data-act="raw-add">Add to document</button><button class="btn-sm" data-act="raw-body">Replace body (keep header)</button></div></details>`;
+
+export const html = () => `${rawBox}<div class="palette">${PALETTE.map(([k, v]) => `<button class="btn-sm" data-act="add" data-add="${k}">+ ${v}</button>`).join("")}</div>
   <div class="cards" id="cards">${S.doc.blocks.map((b, i) => card(b, i, S.doc.blocks.length)).join("") || '<p class="hint">No blocks yet - add one above.</p>'}</div>`;
 
 const idOf = (t) => t.closest("[data-id]")?.dataset.id;
 export const acts = {
   ...tableActs, ...shotActs,
+  "raw-add"() { const n = addParsed(false); n && toast(`Added ${n} blocks`); },
+  "raw-body"() { const n = addParsed(true); n && toast(`Body replaced with ${n} blocks`); },
   add(t) { const [type, kind] = t.dataset.add.split(":"); addBlock(type, kind); },
   pick(t, e) { if (e.target.closest("button,.grip")) return; select(idOf(t), "list"); scrollToBlock(idOf(t)); },
   up: (t, e) => (e.stopPropagation(), moveBlock(idOf(t), -1)),
@@ -45,6 +54,12 @@ export const acts = {
   dup: (t, e) => (e.stopPropagation(), duplicateBlock(idOf(t))),
   del: (t, e) => (e.stopPropagation(), deleteBlock(idOf(t))),
 };
+
+function addParsed(replace) {
+  const box = document.querySelector("#rawtext"), blocks = parseRaw(box?.value);
+  if (!blocks.length) return toast("Paste some text first") && 0;
+  insertBlocks(blocks, replace); return blocks.length;
+}
 
 let dnd;
 /** (Re)attach drag and drop after every render: grips reorder the cards, palette chips can be dropped between them. */

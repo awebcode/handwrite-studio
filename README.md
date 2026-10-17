@@ -1,6 +1,6 @@
-# ai-hand-writing-generator
+# Handwrite Studio
 
-Turn typed assignment answers into **realistic handwritten, scanned-looking A4 pages** and a print-ready **PDF per student** - with different handwriting, margins and page design for every student.
+**Handwrite Studio** turns typed assignment answers into **realistic handwritten, scanned-looking A4 pages** (PDF / PNG / JPG), with a drag-and-drop **editor**, a **cover page maker**, and a Node generator for batches of students. The web app runs entirely in the browser; nothing is uploaded.
 
 Write the questions and answers once in plain JavaScript, describe each student in a small profile, run one command, and get:
 
@@ -57,6 +57,8 @@ A fully client-side app in `site/`: home page, a drag-and-drop **editor** and th
 
 - Blocks: questions, answers, points, code, tables, terminal screenshots, pasted / dropped images (auto-resized), spacers, page breaks.
 - Handwriting: 9 handwriting fonts plus standard fonts, skew, tilt, wobble, random pen dots, margins and a scanner look; header layouts and templates.
+- **Paste raw text**: paste plain notes (`Q1.` question, `Ans.` answer, `- item` point, `# Heading`, ``` code fences, `---` line) and they become formatted blocks. Long text flows onto new pages automatically.
+- Drag whole cards to reorder (dnd-kit; mouse, touch and keyboard), drop palette chips between cards, resize pictures with the on-page handle.
 - Undo / redo (Ctrl+Z), autosave per browser (IndexedDB), project import / export, download as PDF / PNG zip / JPG zip named `ROLL-NAME-BATCH-TITLE`.
 - State lives in a [zustand](https://github.com/pmndrs/zustand) vanilla store; there is no build step.
 

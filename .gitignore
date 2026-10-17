@@ -21,4 +21,7 @@ tools/hwbuild/profiles/*.mjs
 .env.*
 
 # your own cover-page content (auto-loaded by /cover when present)
-site/cover/preset.local.json
+local/
+
+# local Cloudflare/wrangler state
+.wrangler/

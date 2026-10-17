@@ -1,6 +1,6 @@
 // Page element -> final "scanned" canvas (1240 x 1754 = A4 at 150 dpi).
 import { vendor } from "../../../shared/vendor.js";
-import { A4W } from "../engine/constants.js";
+import { A4W, A4H } from "../engine/constants.js";
 import { mulberry } from "../engine/rng.js";
 import { wobble } from "./wobble.js";
 import { scanify } from "./scan.js";
@@ -15,7 +15,7 @@ async function capture(pageEl, paper) {
   const copy = pageEl.cloneNode(true); copy.style.transform = ""; copy.style.zoom = "";
   holder.appendChild(copy); document.body.appendChild(holder);
   try {
-    return await html2canvas(copy, { scale: OUT_W / A4W, backgroundColor: paper, logging: false, useCORS: true });
+    return await html2canvas(copy, { scale: OUT_W / A4W, backgroundColor: paper, logging: false, useCORS: true, width: A4W, height: A4H, windowWidth: A4W, windowHeight: A4H, x: 0, y: 0, scrollX: 0, scrollY: 0 });
   } finally { holder.remove(); }
 }
 

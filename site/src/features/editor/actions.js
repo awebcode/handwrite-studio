@@ -40,6 +40,14 @@ export function moveBlock(id, delta) {
   if (i < 0 || j < 0 || j >= S.doc.blocks.length) return;
   const [b] = S.doc.blocks.splice(i, 1); S.doc.blocks.splice(j, 0, b); structure();
 }
+/** Add several blocks after the selection (or replace everything below the header). */
+export function insertBlocks(blocks, replaceBody = false) {
+  const doc = S.doc.blocks;
+  if (replaceBody) { const head = doc.filter((b) => b.hdr); S.doc.blocks = [...head, ...blocks]; }
+  else doc.splice(S.sel ? indexOf(S.sel) + 1 : doc.length, 0, ...blocks);
+  S.sel = blocks[0].id; S.scrollTo = blocks[0].id; structure();
+}
+
 export function moveTo(from, to) {
   const blocks = S.doc.blocks;
   if (from === to || from < 0 || to < 0 || from >= blocks.length || to >= blocks.length) return;

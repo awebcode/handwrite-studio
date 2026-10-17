@@ -53,9 +53,12 @@ body.dragging { user-select: none; } body.dragging .card { transition: transform
   body.app { height: 100dvh; overflow: hidden; } #layout { grid-template-columns: minmax(0, 1fr); padding-bottom: 54px; }
   #layout[data-view="edit"] #stage, #layout[data-view="pages"] #side, #layout[data-view="add"] #stage { display: none; }
   #side { border-right: 0; max-height: none; } #stage { padding: 10px 4px; }
-  #topbar { flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding: 6px 8px; } #topbar > * { flex: none; }
+  #topbar { gap: 6px; padding: 6px 8px; padding-top: calc(6px + env(safe-area-inset-top)); } #topbar .grow { display: none; } #pname-top { flex: 1 1 120px; width: auto; min-width: 0; } #bDownload { margin-left: auto; }
   .brand { font-size: 0; } .brand::before { content: "✎"; font-size: 20px; } #pname-top { width: 120px; } .zoom, #saved { display: none; }
   #mnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--panel); border-top: 1px solid var(--line); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); gap: 8px; }
   #mnav button { flex: 1; padding: 10px 4px; font-weight: 600; } #mnav button.on { border-color: var(--acc); color: var(--acc); }
   .btn-sm { padding: 7px 10px; } .cacts button { padding: 6px 9px; } .grip { padding: 8px 8px; }
 }
+.raw textarea { margin-top: 4px; }
+/* the open card's header (move / duplicate / delete) stays visible while its form scrolls */
+.card.sel > .chead { position: sticky; top: -12px; z-index: 5; background: color-mix(in srgb, var(--acc-soft) 70%, var(--panel)); border-radius: 9px 9px 0 0; border-bottom: 1px solid var(--line); }

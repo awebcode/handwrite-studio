@@ -86,7 +86,7 @@ let tt; function toast(m) { const t = $("toast"); t.textContent = m; t.classList
   if (saved && saved.blocks && saved.page) S = saved;
   else if (fromUrl) S = defaults(urlVals());
   else {
-    try { const r = await fetch("/cover/preset.local.json"); if (r.ok) { const d = await r.json(); if (d.blocks && d.page) S = d; } } catch (e) {}
+    try { if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) throw 0; const r = await fetch("/cover/preset.local.json"); if (r.ok) { const d = await r.json(); if (d.blocks && d.page) S = d; } } catch (e) {}
   }
   if (!S) S = defaults();
   if (QP.get("file")) $("fname").value = QP.get("file");
