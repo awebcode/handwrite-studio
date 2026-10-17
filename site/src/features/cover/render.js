@@ -20,11 +20,12 @@ function blockHtml(b) {
   } else if (b.type === "divider") inner = `<hr class="divider" style="border-top-width:${b.th || 1}px">`;
   else if (b.type === "spacer") inner = `<div style="height:${b.h}px"></div>`;
   else if (b.type === "table") {
+    fixTable(b);
     const cs = b.headers.length;
     const w = b.w, colw = (w / cs).toFixed(1);
     let h = `<table class="tb" style="width:${w}px"><colgroup>${b.headers.map(() => `<col style="width:${colw}px">`).join("")}</colgroup><thead><tr>`;
-    h += b.headers.map((x, c) => `<th data-r="-1" data-c="${c}" style="font-size:${(b.headSize * S.page.scale).toFixed(1)}px;padding:${b.rowH || 6}px 8px"><div contenteditable="true" spellcheck="false">${x}</div></th>`).join("") + "</tr></thead><tbody>";
-    h += b.rows.map((r, ri) => "<tr>" + r.map((x, c) => `<td data-r="${ri}" data-c="${c}" style="font-size:${(b.rowSize * S.page.scale).toFixed(1)}px;padding:${(b.rowH || 6) + 2}px 8px;${b.boldLast && c === cs - 1 ? "font-weight:700;" : ""}"><div contenteditable="true" spellcheck="false">${x}</div></td>`).join("") + "</tr>").join("") + "</tbody></table>";
+    h += b.headers.map((x, c) => `<th data-r="-1" data-c="${c}" style="font-size:${(b.headSize * S.page.scale).toFixed(1)}px;padding:${b.rowH || 6}px 8px"><div contenteditable="true" spellcheck="false" data-ph="Column ${c + 1}">${x}</div></th>`).join("") + "</tr></thead><tbody>";
+    h += b.rows.map((r, ri) => "<tr>" + r.map((x, c) => `<td data-r="${ri}" data-c="${c}" style="font-size:${(b.rowSize * S.page.scale).toFixed(1)}px;padding:${(b.rowH || 6) + 2}px 8px;${b.boldLast && c === cs - 1 ? "font-weight:700;" : ""}"><div contenteditable="true" spellcheck="false" data-ph="Type here">${x}</div></td>`).join("") + "</tr>").join("") + "</tbody></table>";
     inner = h;
   }
   return `<div class="blk${sel === b.id ? " sel" : ""}" data-id="${b.id}" style="margin-top:${mt}px;margin-bottom:${b.type === "logo" && b.mb == null ? 0 : mb}px"><span class="grip ui" title="Drag to reorder">⋮⋮</span>${inner}</div>`;

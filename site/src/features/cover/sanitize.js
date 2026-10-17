@@ -36,7 +36,7 @@ function cleanBlock(b) {
     else out[k] = cleanValue(k, v);
   }
   out.id = cleanValue("id", out.id);
-  return out;
+  return out.type === "table" ? fixTable(out) : out;
 }
 
 /** -> a safe design object, or throws when the file is not a cover design at all. */

@@ -51,10 +51,10 @@ function wirePanel() {
   $("cDup").onclick = () => { const b = cur(), c = JSON.parse(JSON.stringify(b)); c.id = id(); S.blocks.splice(S.blocks.indexOf(b) + 1, 0, c); sel = c.id; render(); save(); };
   const mv = (d) => { const b = cur(), i = S.blocks.indexOf(b), j = i + d; if (j < 0 || j >= S.blocks.length) return; S.blocks.splice(i, 1); S.blocks.splice(j, 0, b); render(); save(); };
   $("cUp").onclick = () => mv(-1); $("cDown").onclick = () => mv(1);
-  $("tAddR").onclick = () => { const b = cur(); b.rows.push(b.headers.map(() => "&nbsp;")); renderKeep(); };
-  $("tDelR").onclick = () => { const b = cur(); if (b.rows.length > 1) b.rows.pop(); renderKeep(); };
-  $("tAddC").onclick = () => { const b = cur(); b.headers.push("Column"); b.rows.forEach((r) => r.push("&nbsp;")); renderKeep(); };
-  $("tDelC").onclick = () => { const b = cur(); if (b.headers.length > 1) { b.headers.pop(); b.rows.forEach((r) => r.pop()); } renderKeep(); };
+  $("tAddR").onclick = () => { const b = cur(); b.rows.push(b.headers.map(() => "")); renderKeep(); };
+  $("tDelR").onclick = () => { const b = cur(); if (b.rows.length > 1) b.rows.pop(); fixTable(b); renderKeep(); };
+  $("tAddC").onclick = () => { const b = cur(); b.headers.push("Column " + (b.headers.length + 1)); b.rows.forEach((r) => r.push("")); renderKeep(); };
+  $("tDelC").onclick = () => { const b = cur(); if (b.headers.length > 1) { b.headers.pop(); b.rows.forEach((r) => r.pop()); } fixTable(b); renderKeep(); };
   $("cLogoPick").onclick = () => pickLogo(sel);
   $("cLogoDef").onclick = () => { cur().src = ""; renderKeep(); };
   $("cLogoNone").onclick = () => { cur().src = null; renderKeep(); };
@@ -71,7 +71,7 @@ function addBlock(type) {
   else if (type === "divider") b = { id: id(), type: "divider", th: 1, mt: 8, mb: 8 };
   else if (type === "spacer") b = { id: id(), type: "spacer", h: 30 };
   else if (type === "logo") b = { id: id(), type: "logo", src: "", w: 76, mb: 6, align: "center" };
-  else b = { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: false, mt: 0, mb: 0, headers: ["Column 1", "Column 2"], rows: [["&nbsp;", "&nbsp;"]] };
+  else b = { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: false, mt: 0, mb: 0, headers: ["Column 1", "Column 2"], rows: [["", ""]] };
   const i = sel ? S.blocks.indexOf(cur()) + 1 : S.blocks.length;
   S.blocks.splice(i, 0, b); sel = b.id; render(); save();
 }

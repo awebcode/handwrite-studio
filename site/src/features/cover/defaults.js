@@ -14,7 +14,7 @@ function defaults(v = {}) {
   const g = (k, d) => (v[k] !== undefined && v[k] !== "" ? esc(v[k]) : d);
   const title = g("title", "Assignment 1");
   const rows = [[g("id", "0000000000"), g("name", "Your Full Name")]];
-  for (let i = 2; i <= 6; i++) if (v["id" + i] || v["name" + i]) rows.push([g("id" + i, "&nbsp;"), g("name" + i, "&nbsp;")]);
+  for (let i = 2; i <= 6; i++) if (v["id" + i] || v["name" + i]) rows.push([g("id" + i, ""), g("name" + i, "")]);
   return {
     v: 1,
     page: { font: v.font || "'Times New Roman', 'Liberation Serif', Times, serif", scale: 1, padV: 62, padH: 70, just: "flex-start", frame: v.border === "1", frameW: 2, frameC: "#222222", frameI: 22, accent: A, head: v.head || "#4472c4", headInk: "#111111", row: v.row || "#dbe5f1", grid: "#8eaadb", paper: "#ffffff", zoom: v.zoom ? +v.zoom : 0.85 },
