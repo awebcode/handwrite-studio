@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor - Handwrite Studio</title>
+<meta name="description" content="Write, arrange and download handwritten assignment pages.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238d3d2c'/%3E%3Cpath d='M9 23l3-1 10-10-2-2L10 20z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/handwriting.css">
+<link rel="stylesheet" href="/assets/css/editor.css">
+<link rel="preload" href="/assets/fonts/kalam.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+<body class="app">
+<header id="topbar">
+  <a class="brand" href="/" title="Home">✎ Handwrite Studio</a>
+  <button id="bUndo" title="Undo (Ctrl+Z)" disabled>↶</button><button id="bRedo" title="Redo (Ctrl+Shift+Z)" disabled>↷</button>
+  <input id="pname-top" type="text" aria-label="Project name" spellcheck="false">
+  <span id="saved" class="mute"></span><span id="busy-dot" class="mute" hidden>rendering…</span>
+  <span class="grow"></span>
+  <label class="zoom" title="Zoom">🔍<input id="zoom" type="range" min="0.3" max="1.2" step="0.05" value="0.6"></label>
+  <a class="btn" href="/cover/">Cover page</a>
+  <button id="bFinal">Final look</button>
+  <select id="fmt" aria-label="Download format"><option value="pdf">PDF</option><option value="png">PNG zip</option><option value="jpg">JPG zip</option></select>
+  <button id="bDownload" class="btn-pri" disabled>⬇ Download</button>
+</header>
+<main id="layout">
+  <aside id="side"><nav id="tabs"></nav><div id="sidebody"></div></aside>
+  <section id="stage"><div id="pages"></div></section>
+</main>
+<div id="overlay" class="overlay"></div>
+<script type="module" src="/src/features/editor/main.js"></script>
+</body>
+</html>

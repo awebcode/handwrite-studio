@@ -51,6 +51,32 @@ HW_ASSIGNMENT=lab2 npm run hw:preview
 
 Output goes to `public/<outDir>/` (PDFs and `<student>/NN.jpg`). The preview page lists the last build.
 
+## Handwrite Studio (web app)
+
+A fully client-side app in `site/`: home page, a drag-and-drop **editor** and the **cover page maker**.
+
+- Blocks: questions, answers, points, code, tables, terminal screenshots, pasted / dropped images (auto-resized), spacers, page breaks.
+- Handwriting: 9 handwriting fonts plus standard fonts, skew, tilt, wobble, random pen dots, margins and a scanner look; header layouts and templates.
+- Undo / redo (Ctrl+Z), autosave per browser (IndexedDB), project import / export, download as PDF / PNG zip / JPG zip named `ROLL-NAME-BATCH-TITLE`.
+- State lives in a [zustand](https://github.com/pmndrs/zustand) vanilla store; there is no build step.
+
+```bash
+npm install
+npm run dev          # http://localhost:8080  (editor at /editor/, cover at /cover/)
+```
+
+### Deploy to Cloudflare Pages
+
+`wrangler.jsonc` points Pages at `./site`, and `site/_headers` sets the security headers and caching.
+
+```bash
+npm run vendor       # refresh site/vendor from node_modules (already committed)
+npm run cf:dev       # local Pages preview
+npm run cf:deploy    # wrangler pages deploy site
+```
+
+Or connect the repo in the Cloudflare dashboard: build command empty, output directory `site`.
+
 ## Cover page maker
 
 An editable **A4 cover page** (logo, title, course, batch, date, "Submitted to", "Submitted by" table) that you can customise in the browser and download as PDF or PNG.
@@ -60,7 +86,7 @@ An editable **A4 cover page** (logo, title, course, batch, date, "Submitted to",
 ![preview header with a Cover page button per student](docs/preview-header.png)
 
 ```bash
-npm run cover        # then open http://localhost:8080/cover
+npm run cover        # then open http://localhost:8080/cover/
 ```
 
 - **Everything is editable in place** - click any line, label or table cell and type. Ctrl+B / I / U work inside a line.
@@ -70,15 +96,15 @@ npm run cover        # then open http://localhost:8080/cover
 - **Table**: add / remove rows and columns, change width, text sizes, row height, header and row colours.
 - **Page**: font, text scale, margins, vertical alignment, optional page border, accent / table / paper colours, zoom.
 - **Download bar (top right)**: file name, format (**PNG by default**, or PDF) and a **Download** button; the **⋯** menu has Print, Copy link, Save design (.json), Load design and Reset. PNG is 2x (1588 x 2244); PDF is exact A4. With the preview server running the PDF has real vector text; without it the page renders the file in the browser instead.
-- **Per-student cover pages**: the preview page shows a **Cover page** button under each student (and next to Download as PDF). It opens `/cover` prefilled with that student's name, roll, batch, date, course, instructor and so on, and every field stays editable. Your edits are remembered per link.
-- **Your own default content**: put a saved design at `cover/preset.local.json` (git-ignored) and it loads automatically on first open.
+- **Per-student cover pages**: the preview page shows a **Cover page** button under each student (and next to Download as PDF). It opens `/cover/` prefilled with that student's name, roll, batch, date, course, instructor and so on, and every field stays editable. Your edits are remembered per link.
+- **Your own default content**: put a saved design at `site/cover/preset.local.json` (git-ignored) and it loads automatically on first open.
 
 ### Fill the cover page from the URL
 
 Every field can be set with a query parameter, so you can link, bookmark or script cover pages:
 
 ```
-/cover?title=Lab+Assignment+1&course=Course+Name&code=CSE0000000&term=Fall+26&batch=00A+Day
+/cover/?title=Lab+Assignment+1&course=Course+Name&code=CSE0000000&term=Fall+26&batch=00A+Day
       &assignment=Lab+Assignment+1&date=01-01-2027&teacher=Teacher+Name&role=Lecturer
       &dept=Department+of+CSE&university=Example+University&city=Dhaka
       &id=2200000001&name=Alice+Rahman&file=MY-COVER&download=png
@@ -100,7 +126,7 @@ Every field can be set with a query parameter, so you can link, bookmark or scri
 
 The instructor, course, term and city for the preview buttons come from your assignment file (`instructor`, `instructorRole`, `course`, `term`, `city`, ...), and `batchLabel` from each student profile.
 
-If you open `cover/index.html` without the preview server, everything still works: PNG / PDF are rendered in the browser (needs internet once, to load the html2canvas and jsPDF libraries from cdnjs).
+PNG / PDF are rendered in the browser with the vendored html2canvas and jsPDF, so the cover maker also works as a static site.
 
 ## Project layout
 
@@ -117,7 +143,13 @@ tools/hwbuild/
   preview.mjs               tiny dependency-free preview server
   fonts/                    Gloria Hallelujah, Kalam, VT323 (SIL OFL)
 preview/index.html          preview page (student tabs, page images, Download as PDF)
-cover/index.html            editable A4 cover-page maker (single file, no dependencies)
+site/                       Handwrite Studio web app (static, no build step)
+  index.html                home page
+  editor/                   drag-and-drop handwriting editor
+  cover/                    cover-page maker
+  src/features/*            home, editor, handwriting engine, cover
+  src/shared/*              reusable helpers (history, storage, images, forms)
+  vendor/                   html2canvas, jsPDF, JSZip, zustand (vendored)
 ```
 
 ## Write an assignment

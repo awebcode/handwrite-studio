@@ -52,7 +52,7 @@ function coverHref(set, s) {
     date: shortDate(s.date), teacher: c.instructor || "", role: c.instructorRole || "", dept: c.dept || "", university: c.university || "", city: c.city || "",
     id: s.roll, name: s.name, file: s.fileName.replace(/\.pdf$/, "-COVER") });
   for (const [k, v] of [...q]) if (!v) q.delete(k);
-  return "/cover?" + q.toString();
+  return "/cover/?" + q.toString();
 }
 
 function render() {

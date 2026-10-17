@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cover Page Maker - Handwrite Studio</title>
+<link rel="stylesheet" href="/assets/css/cover.css">
+<style id="sheetcss">
+  .sheet { position:relative; width:794px; height:1122px; background:#fff; color:#000; box-sizing:border-box; overflow:visible; transform-origin:top left; box-shadow:0 2px 14px rgba(0,0,0,.18); font-family:var(--font); }
+  .sheet .inner { position:absolute; inset:0; padding:var(--padv) var(--padh); display:flex; flex-direction:column; }
+  .sheet .frame { position:absolute; inset:var(--frameInset); border:var(--frameW) solid var(--frameC); pointer-events:none; }
+  .blk { position:relative; flex:none; }
+  .blk .t { outline:none; white-space:pre-wrap; word-break:break-word; min-height:1em; }
+  .blk .t b, .blk .t strong { font-weight:700; }
+  .logo { display:flex; }
+  .logo img, .logo svg { display:block; max-width:100%; height:auto; }
+  .divider { border:0; border-top:1px solid #000; margin:0; }
+  table.tb { border-collapse:collapse; margin:0 auto; table-layout:fixed; }
+  table.tb th, table.tb td { border:1px solid var(--grid); padding:6px 8px; text-align:center; vertical-align:middle; word-break:break-word; }
+  table.tb th { background:var(--head); color:var(--headInk); font-weight:400; }
+  table.tb td { background:var(--row); }
+  table.tb [contenteditable] { outline:none; min-height:1em; }
+  /* editor-only chrome */
+  .ui { font:12px system-ui, sans-serif; }
+  .blk .grip { position:absolute; left:-40px; top:0; width:20px; height:22px; cursor:grab; background:var(--ui-acc, #3b5bdb); color:#fff; border-radius:4px; text-align:center; line-height:22px; opacity:0; user-select:none; }
+  .blk:hover .grip, .blk.sel .grip { opacity:1; }
+  .blk:hover { outline:1px dashed #9aa8ff; outline-offset:3px; }
+  .blk.sel { outline:2px solid #3b5bdb; outline-offset:3px; }
+  .blk.dropbefore::before, .blk.dropafter::after { content:""; position:absolute; left:-8px; right:-8px; height:3px; background:#3b5bdb; }
+  .blk.dropbefore::before { top:-5px; } .blk.dropafter::after { bottom:-5px; }
+  .logo.empty { border:2px dashed #9aa8ff; color:#6b78c9; align-items:center; justify-content:center; height:90px; font:13px system-ui; cursor:pointer; }
+  .logo .cap { position:absolute; right:-6px; top:-6px; display:flex; gap:4px; opacity:0; }
+  .blk.sel .logo .cap, .blk:hover .logo .cap { opacity:1; }
+  .logo .cap button { background:#fff; color:#222; border:1px solid #bbb; padding:2px 7px; font-size:11px; }
+  .logo { position:relative; }
+</style>
+</head>
+<body>
+<div id="topbar">
+  <button id="bUndo" title="Undo (Ctrl+Z)" disabled>↶</button><button id="bRedo" title="Redo (Ctrl+Shift+Z / Ctrl+Y)" disabled>↷</button>
+  <input type="text" id="fname" value="cover-page" title="File name" aria-label="File name">
+  <select id="fmt" title="Download format" aria-label="Download format"><option value="png">PNG</option><option value="pdf">PDF</option></select>
+  <button class="pri" id="bDownload">⬇ Download</button>
+  <details id="more"><summary title="More options">⋯</summary>
+    <div class="menu">
+      <button id="bPrint">Print</button>
+      <button id="bLink">Copy link</button>
+      <button id="bSave">Save design (.json)</button>
+      <button id="bLoad">Load design…</button>
+      <button id="bReset">Reset</button>
+    </div>
+  </details>
+  <input type="file" id="fJson" accept="application/json,.json" hidden>
+  <input type="file" id="fImg" accept="image/*" hidden>
+</div>
+<aside id="panel">
+  <h1>Cover Page Maker</h1>
+  <p class="tip">Click any text to edit it. Click a block to style it. Drag the blue grip to reorder. Drop an image on the logo.</p>
+
+  <h2>Selected block</h2>
+  <div id="none">Nothing selected. Click a line, the logo or the table.</div>
+  <div id="blockctl" hidden>
+    <div class="row"><label>Size</label><input type="range" id="cSize" min="8" max="64" step="1"><span id="vSize"></span></div>
+    <div class="row">
+      <button class="sm" id="cBold"><b>B</b></button><button class="sm" id="cItalic"><i>I</i></button><button class="sm" id="cUnder"><u>U</u></button>
+      <button class="sm" id="cL">⟸</button><button class="sm" id="cC">≡</button><button class="sm" id="cR">⟹</button>
+      <input type="color" id="cColor" title="Text colour">
+    </div>
+    <div class="row"><label>Font</label>
+      <select id="cFont">
+        <option value="">Page font</option>
+        <option value="'Times New Roman', 'Liberation Serif', Times, serif">Times / serif</option>
+        <option value="Arial, 'Liberation Sans', Helvetica, sans-serif">Arial / sans</option>
+        <option value="Georgia, 'DejaVu Serif', serif">Georgia</option>
+        <option value="'Arial Black', 'Liberation Sans', sans-serif">Arial Black</option>
+        <option value="'Courier New', 'Liberation Mono', monospace">Courier / mono</option>
+        <option value="'Palatino Linotype', Palatino, 'Book Antiqua', serif">Palatino</option>
+        <option value="'Trebuchet MS', Verdana, sans-serif">Trebuchet</option>
+      </select>
+    </div>
+    <div class="row"><label>Space above</label><input type="range" id="cMt" min="0" max="160" step="2"><span id="vMt"></span></div>
+    <div class="row"><label>Space below</label><input type="range" id="cMb" min="0" max="160" step="2"><span id="vMb"></span></div>
+    <div class="row"><label>Line height</label><input type="range" id="cLh" min="1" max="2.2" step="0.05"><span id="vLh"></span></div>
+    <div class="row"><label>Letter spacing</label><input type="range" id="cLs" min="-1" max="8" step="0.5"><span id="vLs"></span></div>
+    <div id="logoctl" hidden>
+      <div class="row"><label>Logo width</label><input type="range" id="cLogoW" min="30" max="400" step="2"><span id="vLogoW"></span></div>
+      <div class="row"><button class="sm" id="cLogoPick">Choose image…</button><button class="sm" id="cLogoDef">Default logo</button><button class="sm" id="cLogoNone">Remove</button></div>
+    </div>
+    <div id="tblctl" hidden>
+      <div class="row"><button class="sm" id="tAddR">+ row</button><button class="sm" id="tDelR">− row</button><button class="sm" id="tAddC">+ column</button><button class="sm" id="tDelC">− column</button></div>
+      <div class="row"><label>Table width</label><input type="range" id="tW" min="200" max="660" step="2"><span id="vtW"></span></div>
+      <div class="row"><label>Row text size</label><input type="range" id="tRs" min="9" max="34" step="1"><span id="vtRs"></span></div>
+      <div class="row"><label>Header size</label><input type="range" id="tHs" min="8" max="30" step="1"><span id="vtHs"></span></div>
+      <div class="row"><label>Row height</label><input type="range" id="tRh" min="0" max="40" step="1"><span id="vtRh"></span></div>
+      <div class="row"><label>Bold last column</label><input type="checkbox" id="tBold"></div>
+    </div>
+    <div class="row"><button class="sm" id="cDup">Duplicate</button><button class="sm" id="cUp">↑</button><button class="sm" id="cDown">↓</button><button class="sm" id="cDel">Delete</button></div>
+  </div>
+
+  <h2>Add block</h2>
+  <div class="row"><button class="sm" data-add="text">Text line</button><button class="sm" data-add="table">Table</button><button class="sm" data-add="logo">Logo</button><button class="sm" data-add="divider">Divider</button><button class="sm" data-add="spacer">Spacer</button></div>
+
+  <h2>Page</h2>
+  <div class="row"><label>Font</label>
+    <select id="pFont">
+      <option value="'Times New Roman', 'Liberation Serif', Times, serif">Times / serif</option>
+      <option value="Arial, 'Liberation Sans', Helvetica, sans-serif">Arial / sans</option>
+      <option value="Georgia, 'DejaVu Serif', serif">Georgia</option>
+      <option value="'Palatino Linotype', Palatino, 'Book Antiqua', serif">Palatino</option>
+      <option value="'Trebuchet MS', Verdana, sans-serif">Trebuchet</option>
+      <option value="'Courier New', 'Liberation Mono', monospace">Courier</option>
+    </select>
+  </div>
+  <div class="row"><label>Text scale</label><input type="range" id="pScale" min="0.7" max="1.4" step="0.02"><span id="vpScale"></span></div>
+  <div class="row"><label>Top / bottom margin</label><input type="range" id="pPadV" min="10" max="200" step="2"><span id="vpPadV"></span></div>
+  <div class="row"><label>Side margin</label><input type="range" id="pPadH" min="10" max="200" step="2"><span id="vpPadH"></span></div>
+  <div class="row"><label>Vertical align</label>
+    <select id="pJust"><option value="flex-start">Top</option><option value="center">Middle</option><option value="space-between">Spread</option></select></div>
+  <div class="row"><label>Page border</label><input type="checkbox" id="pFrame"></div>
+  <div class="row"><label>Border thickness</label><input type="range" id="pFrameW" min="1" max="12" step="1"></div>
+  <div class="row"><label>Border colour</label><input type="color" id="pFrameC"></div>
+  <div class="row"><label>Border inset</label><input type="range" id="pFrameI" min="6" max="60" step="1"><span id="vpFrameI"></span></div>
+  <div class="row"><label>Accent text</label><input type="color" id="pAccent"></div>
+  <div class="row"><label>Table header</label><input type="color" id="pHead"></div>
+  <div class="row"><label>Table header text</label><input type="color" id="pHeadInk"></div>
+  <div class="row"><label>Table rows</label><input type="color" id="pRow"></div>
+  <div class="row"><label>Table grid lines</label><input type="color" id="pGrid"></div>
+  <div class="row"><label>Paper colour</label><input type="color" id="pPaper"></div>
+  <div class="row"><label>Zoom</label><input type="range" id="zoom" min="0.4" max="1.4" step="0.05"><span id="vzoom"></span></div>
+</aside>
+
+<div id="stagewrap"><div id="stage"><div class="sheet" id="sheet"></div><div id="bubble" class="ui" hidden></div><div id="over" class="ui">Content runs past the bottom of the A4 page</div></div></div>
+<div id="toast"></div>
+
+<script src="/src/features/cover/defaults.js"></script>
+<script src="/src/features/cover/state.js"></script>
+<script src="/src/features/cover/render.js"></script>
+<script src="/src/features/cover/bubble.js"></script>
+<script src="/src/features/cover/panel.js"></script>
+<script src="/src/features/cover/export.js"></script>
+</body>
+</html>

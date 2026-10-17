@@ -1,0 +1,49 @@
+body.app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+#topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.brand { font: 700 16px var(--font-display); text-decoration: none; margin-right: 6px; white-space: nowrap; }
+#pname-top { width: 200px; font-weight: 600; }
+.grow { flex: 1; } .mute { color: var(--mute); font-size: 12px; }
+.zoom { display: flex; align-items: center; gap: 4px; } .zoom input { width: 90px; }
+.btn { padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; text-decoration: none; }
+.btn:hover { border-color: var(--acc); }
+#topbar select { width: auto; }
+#layout { flex: 1; display: grid; grid-template-columns: 380px 1fr; min-height: 0; }
+#side { display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); min-height: 0; }
+#tabs { display: flex; border-bottom: 1px solid var(--line); }
+#tabs button { flex: 1; border: 0; border-radius: 0; padding: 10px 4px; border-bottom: 2px solid transparent; }
+#tabs button.on { border-bottom-color: var(--acc); color: var(--acc); font-weight: 650; }
+#sidebody { flex: 1; overflow: auto; padding: 12px; }
+#stage { overflow: auto; padding: 18px; background: color-mix(in srgb, var(--bg) 85%, #000); }
+#pages { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.pgwrap .plabel { text-align: center; color: var(--mute); font-size: 12px; margin-bottom: 4px; }
+.pgbox { box-shadow: var(--shadow); background: #fff; overflow: hidden; }
+.pgscale { transform-origin: 0 0; width: 794px; height: 1123px; }
+.selhl { outline: 2px solid var(--focus); outline-offset: 2px; background: rgba(59, 91, 219, .08); }
+.hwink [data-bid] { cursor: pointer; }
+.hint { color: var(--mute); font-size: 12px; margin: 5px 0; }
+.palette { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.card { border: 1px solid var(--line); border-radius: 9px; margin: 6px 0; background: var(--bg); }
+.card.sel { border-color: var(--acc); }
+.card.dropbefore { box-shadow: 0 -3px 0 var(--focus); } .card.dropafter { box-shadow: 0 3px 0 var(--focus); }
+.chead { display: flex; align-items: center; gap: 6px; padding: 5px 8px; cursor: pointer; }
+.chead .snip { flex: 1; color: var(--mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.grip { cursor: grab; color: var(--mute); user-select: none; }
+.cacts { display: flex; } .cacts button { padding: 2px 6px; }
+.cbody { padding: 4px 10px 10px; border-top: 1px solid var(--line); }
+textarea.mono, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+.thumb { border: 1px dashed var(--line); border-radius: 8px; padding: 6px; text-align: center; color: var(--mute); }
+.thumb img { max-width: 100%; max-height: 140px; }
+.tpls { display: grid; gap: 6px; margin: 8px 0; }
+.tpl { text-align: left; display: flex; flex-direction: column; } .tpl small, .proj small { color: var(--mute); display: block; }
+.proj { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; margin: 5px 0; }
+.proj.cur { border-color: var(--acc); }
+.tbl { width: 100%; border-collapse: collapse; } .tbl td { padding: 2px; } .tbl input { padding: 4px; }
+.fl-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.fl { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; } .fl img { width: 100%; box-shadow: var(--shadow); }
+.fatal { padding: 20px; color: var(--danger); }
+@media (max-width: 860px) {
+  body.app { height: auto; overflow: auto; } #layout { grid-template-columns: 1fr; }
+  #side { max-height: 55vh; border-right: 0; border-bottom: 1px solid var(--line); } #stage { padding: 10px 4px; }
+  #pname-top { width: 130px; } .zoom { display: none; }
+}
+.grid { width: 100%; border-collapse: collapse; } .grid td { padding: 2px; } .grid input { padding: 4px; }

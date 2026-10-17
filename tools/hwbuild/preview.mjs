@@ -1,6 +1,6 @@
 // Tiny preview server (no framework):  node tools/hwbuild/preview.mjs     PORT=8080 HOST=127.0.0.1
-//   /             handwritten assignments (student tabs, page images, Download as PDF)
-//   /cover        editable A4 cover-page maker (drag & drop logo, PDF / PNG export)
+//   /             Handwrite Studio (site/): home, /editor/, /cover/
+//   /generated/   pages made by the Node generator (student tabs, Download as PDF)
 import { createServer } from "node:http";
 import { readFileSync, existsSync, readdirSync, statSync, createReadStream } from "node:fs";
 import path from "node:path";
@@ -10,9 +10,11 @@ import { findChrome } from "./lib/chrome.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const pub = path.join(root, "public");
+const site = path.join(root, "site");
 const port = Number(process.env.PORT || 8080);
 const host = process.env.HOST || "127.0.0.1";
-const types = { ".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".pdf": "application/pdf", ".json": "application/json", ".png": "image/png" };
+const types = { ".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".pdf": "application/pdf", ".json": "application/json", ".png": "image/png",
+  ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".woff2": "font/woff2", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".txt": "text/plain; charset=utf-8" };
 
 function manifests() {
   if (!existsSync(pub)) return [];
@@ -48,6 +50,7 @@ function readBody(req, limit = 40 * 1024 * 1024) {
 }
 
 function sendFile(res, file) {
+  if (existsSync(file) && statSync(file).isDirectory()) file = path.join(file, "index.html");
   if (!file.startsWith(root) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); return res.end("not found"); }
   res.writeHead(200, { "content-type": types[path.extname(file)] || "application/octet-stream" });
   createReadStream(file).pipe(res);
@@ -64,12 +67,13 @@ createServer(async (req, res) => {
       return res.end(buf);
     }
     if (url === "/api/manifests") { res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(manifests())); }
-    if (url === "/") return sendFile(res, path.join(root, "preview/index.html"));
-    if (url === "/cover" || url === "/cover/") return sendFile(res, path.join(root, "cover/index.html"));
-    if (url.startsWith("/cover/")) return sendFile(res, path.join(root, url));
+    if (url === "/api/ping") { res.writeHead(200, { "content-type": "application/json" }); return res.end('{"ok":true}'); }
+    if (url === "/generated" || url === "/generated/") return sendFile(res, path.join(root, "preview/index.html"));
+    const inSite = path.join(site, url);
+    if (existsSync(inSite)) return sendFile(res, inSite);
     return sendFile(res, path.join(pub, url));
   } catch (e) {
     res.writeHead(500, { "content-type": "text/plain" });
     res.end(String(e.message || e));
   }
-}).listen(port, host, () => console.log(`Preview on http://localhost:${port}   (cover page maker: http://localhost:${port}/cover)`));
+}).listen(port, host, () => console.log(`Preview on http://localhost:${port}   (editor: /editor/  cover: /cover/  generated: /generated/)`));

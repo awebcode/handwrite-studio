@@ -1,0 +1,59 @@
+@font-face { font-family: "Gloria"; src: url("../fonts/gloria.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Kalam"; src: url("../fonts/kalam.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "VT323"; src: url("../fonts/vt323.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Patrick Hand"; src: url("../fonts/patrickhand.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Indie Flower"; src: url("../fonts/indieflower.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Handlee"; src: url("../fonts/handlee.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Caveat"; src: url("../fonts/caveat.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Shadows Into Light"; src: url("../fonts/shadowsintolight.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Covered By Your Grace"; src: url("../fonts/coveredbyyourgrace.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Reenie Beanie"; src: url("../fonts/reeniebeanie.woff2") format("woff2"); font-display: swap; }
+
+/* A4 page */
+.hwpage { position: relative; width: 794px; height: 1123px; overflow: hidden; background: #fff; box-sizing: border-box; font-family: var(--font); }
+.hwpage.measure { height: auto; overflow: visible; }
+.hwrules, .hwmarks { position: absolute; inset: 0; pointer-events: none; }
+.hwrules { z-index: 1; } .hwmarks { z-index: 5; }
+.hwrules i { position: absolute; display: block; }
+.hwink { position: relative; z-index: 2; font-family: var(--font); font-size: var(--fs); line-height: var(--lh); color: var(--ink); font-weight: 400; }
+.hwink > * { transform-origin: left center; }
+.pno { position: absolute; right: 46px; bottom: 16px; z-index: 4; font-family: var(--font); font-size: 15px; color: var(--ink); }
+
+/* text kinds */
+.hwink .w { display: inline-block; }
+.hwink .n9 { display: inline-block; font-style: normal; line-height: 1; }
+.hwink .hdr { text-align: center; }
+.hwink .t1 { font-size: 1.42em; line-height: 1.2; margin: 0 0 1px; }
+.hwink .t2 { font-size: 1.08em; line-height: 1.28; margin: 0 0 1px; }
+.hwink .meta { margin: 1px 0; line-height: 1.45; }
+.hwink .sec { font-size: 1.16em; margin: 13px 0 3px; border-bottom: 1.5px solid rgba(20, 20, 20, .8); display: inline-block; padding-bottom: 1px; line-height: 1.25; }
+.hwink .q { margin-top: 11px; line-height: 1.42; }
+.hwink .a { margin-top: 2px; line-height: 1.46; }
+.hwink .idt { padding-left: 18px; }
+.hwink .res { margin-top: 3px; line-height: 1.42; }
+.hwink .boxed { border: 1.6px solid rgba(20, 20, 20, .8); padding: 2px 14px; display: inline-block; }
+.hwink .rule { height: 0; border-top: 1.4px solid rgba(20, 20, 20, .8); margin: 6px 0; }
+.hwink .sp { height: 7px; }
+.hwink .ln { font-size: .9em; line-height: 1.34; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.hwink .ln.i { padding-left: 22px; }
+.hwink .cap { margin: 8px 0 3px; line-height: 1.35; }
+.hwink .tblwrap { margin: 4px 0; }
+.hwink table.tb { border-collapse: collapse; margin: 4px 0 4px 6px; font-size: .9em; }
+.hwink table.tb th, .hwink table.tb td { border: 1.25px solid rgba(20, 20, 20, .88); padding: 1px 8px; line-height: 1.3; font-weight: 400; text-align: left; }
+
+/* screenshots: terminal windows and pasted images */
+.hwink .shot { margin: 6px 0 12px; }
+.hwink .shotimg { margin: 0; background: #fff; }
+.hwink .shotimg img { display: block; width: 100%; height: auto; border: 1px solid rgba(0, 0, 0, .4); }
+.hwink .shotimg.ph { padding: 30px; text-align: center; border: 2px dashed #999; color: #888; font: 14px system-ui; }
+.hwink .win { font-family: Tahoma, sans-serif; }
+.hwink .scr { font-family: "VT323", monospace; font-size: 21px; line-height: 1.12; white-space: pre; }
+.hwink .cur { display: inline-block; width: 9px; height: 15px; background: #c8c8c8; vertical-align: -2px; margin-left: 1px; }
+.hwink .wa { background: #d4d0c8; border: 2px solid #fff; border-right-color: #404040; border-bottom-color: #404040; box-shadow: 3px 4px 0 rgba(0, 0, 0, .35); }
+.hwink .wa .wt { height: 22px; background: linear-gradient(#0a246a, #3a6ea5 55%, #0a246a); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; padding: 0 4px 0 6px; gap: 2px; }
+.hwink .wa .wt span { flex: 1; }
+.hwink .wa .wt i { width: 16px; height: 14px; background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; font: 700 9px/12px Tahoma; text-align: center; color: #111; font-style: normal; }
+.hwink .wa .scr { background: #000; color: #c8c8c8; padding: 10px 12px 14px; min-height: 40px; }
+.hwink .wb { background: #0a0a0a; border: 6px solid #1c1c1c; outline: 1px solid #3a3a3a; box-shadow: 0 8px 16px rgba(0, 0, 0, .28); }
+.hwink .wb .wbar { height: 18px; background: #2b2b2b; color: #d0d0d0; font-size: 11px; display: flex; align-items: center; padding: 0 8px; }
+.hwink .wb .scr { color: #f3f1e6; background: #050505; padding: 12px 14px 16px; }

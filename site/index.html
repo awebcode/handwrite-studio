@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handwrite Studio - realistic handwritten pages</title>
+<meta name="description" content="Type your answers, get natural handwritten, scanned-looking A4 pages. Drag-and-drop editor, cover page maker, PDF / PNG / JPG download. Runs entirely in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238d3d2c'/%3E%3Cpath d='M9 23l3-1 10-10-2-2L10 20z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/handwriting.css">
+<link rel="stylesheet" href="/assets/css/home.css">
+<link rel="preload" href="/assets/fonts/kalam.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+<body class="home">
+<header class="nav">
+  <a class="brand" href="/">✎ Handwrite Studio</a>
+  <nav><a href="#templates">Templates</a><a href="#features">Features</a><a href="/cover/">Cover page</a><a class="btn btn-pri" href="/editor/">Open editor</a></nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="copy">
+      <p class="eyebrow">Free · private · works offline in your browser</p>
+      <h1>Typed answers in, <span class="ink">handwritten pages</span> out.</h1>
+      <p class="lead">Arrange questions, code, tables and screenshots in a drag-and-drop editor, tune the handwriting, and download a scan-style PDF in seconds.</p>
+      <div class="cta">
+        <a class="btn btn-pri big" href="#templates">Start with a template</a>
+        <a class="btn big" href="/cover/">Generate cover page</a>
+        <a class="btn big" id="continue" href="/editor/" hidden>Continue project</a>
+      </div>
+    </div>
+    <div class="paper" aria-hidden="true"><div class="lines"><p id="demo" class="ink"></p></div></div>
+  </section>
+  <section id="templates"><h2>Pick a starting point</h2><div class="grid" id="tplgrid"></div></section>
+  <section id="features"><h2>Everything you need</h2><div class="grid feats" id="featgrid"></div></section>
+</main>
+<footer>Your projects are saved only in this browser. Nothing is uploaded.</footer>
+<script type="module" src="/src/features/home/main.js"></script>
+</body>
+</html>
