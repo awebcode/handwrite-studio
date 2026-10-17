@@ -5,13 +5,16 @@
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'
 
 /assets/*
+  Cache-Control: public, max-age=300, must-revalidate
+
+/assets/fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
 
 /src/*
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: no-cache
 
 /favicon.svg
   Cache-Control: public, max-age=86400
