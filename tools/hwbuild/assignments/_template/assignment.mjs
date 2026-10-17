@@ -7,7 +7,7 @@ export default {
   title: "Assignment 2",
   course: "Course Name",
   courseCode: "CSE0000000",
-  university: "Uttara University",
+  university: "Example University",
   dept: "Department of CSE",
   city: "City, Country",          // shown on the cover page
   term: "Fall 26",
