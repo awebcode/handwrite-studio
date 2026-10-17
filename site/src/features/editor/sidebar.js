@@ -11,9 +11,12 @@ import * as files from "./tabs/files-tab.js";
 const TABS = { content, info, style, page, files };
 const LABELS = { content: "Content", info: "Info", style: "Style", page: "Page", files: "Files" };
 
+let tok = 0;
 async function renderBody() {
-  const body = $("#sidebody"), top = body.scrollTop;
-  body.innerHTML = await TABS[S.tab].html();
+  const body = $("#sidebody"), top = body.scrollTop, mine = ++tok, tab = S.tab;
+  const html = await TABS[tab].html();
+  if (mine !== tok) return; // a newer render started while this one waited
+  body.innerHTML = html;
   body.scrollTop = top;
   TABS[S.tab].after?.(body);
   $("#tabs").innerHTML = Object.entries(LABELS).map(([k, v]) => `<button data-tab="${k}" class="${k === S.tab ? "on" : ""}">${v}</button>`).join("");

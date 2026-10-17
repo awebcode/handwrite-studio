@@ -5,7 +5,7 @@ import("/src/shared/dnd.js").then((m) => {
     onReorder: (from, to) => { const [b] = S.blocks.splice(from, 1); S.blocks.splice(to, 0, b); render(); save(); },
   });
   attachDnd();
-});
+}).catch(() => toast("Drag and drop could not load"));
 
 function attachDnd() {
   if (!dnd) return;

@@ -1,5 +1,6 @@
 // The centre column: paginated handwritten pages, live zoom, click-to-select and drop/paste of images.
 import { $, throttle, el } from "../../shared/dom.js";
+import { toast } from "../../shared/toast.js";
 import { acceptImages } from "../../shared/images.js";
 import { A4W, A4H } from "../handwriting/engine/constants.js";
 import { layout } from "../handwriting/engine/layout.js";
@@ -29,7 +30,8 @@ function rezoom() {
 async function render() {
   const mine = ++token;
   $("#busy-dot").hidden = false;
-  const res = await layout(S.doc, S.images);
+  let res;
+  try { res = await layout(S.doc, S.images); } catch (e) { console.error(e); $("#busy-dot").hidden = true; return toast("Could not draw the pages: " + e.message, 5000); }
   if (mine !== token) return;
   S.layout = res;
   host.replaceChildren(...res.pages.map((p, i) => frame(p, i, res.pages.length)));

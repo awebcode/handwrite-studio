@@ -11,7 +11,7 @@ function open() {
       r.onsuccess = () => res(r.result);
       r.onerror = () => rej(r.error);
     } catch (e) { rej(e); }
-  });
+  }).catch((e) => { opening = null; throw e; });
   return opening;
 }
 async function run(mode, fn) {
@@ -20,17 +20,23 @@ async function run(mode, fn) {
     const t = db.transaction(STORE, mode), r = fn(t.objectStore(STORE));
     t.oncomplete = () => res(r && r.result);
     t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error || new Error("transaction aborted"));
   });
 }
 const safe = async (fn, fallback) => { try { return await fn(); } catch { return fallback(); } };
 
 const IMG = ":img"; // images live in their own record so text edits never rewrite them
 const hasDoc = (r) => r && r.doc;
-/** Saves the project; images are written only when passed (they change rarely and are large). */
+/** Saves the project (meta + optional images in ONE transaction). Resolves true when it reached IndexedDB. */
 export async function saveProject(rec) {
   const { images, ...meta } = rec;
-  await safe(() => run("readwrite", (s) => s.put(meta)), () => void mem.set(meta.id, meta));
-  if (images) await safe(() => run("readwrite", (s) => s.put({ id: rec.id + IMG, images })), () => void mem.set(rec.id + IMG, { images }));
+  try {
+    await run("readwrite", (s) => { const r = s.put(meta); if (images) s.put({ id: rec.id + IMG, images }); return r; });
+    return true;
+  } catch {
+    mem.set(meta.id, meta); if (images) mem.set(rec.id + IMG, { images });
+    return false;
+  }
 }
 export async function loadProject(id) {
   const [meta, im] = await Promise.all([safe(() => run("readonly", (s) => s.get(id)), () => mem.get(id)), safe(() => run("readonly", (s) => s.get(id + IMG)), () => mem.get(id + IMG))]);

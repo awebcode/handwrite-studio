@@ -27,6 +27,7 @@ export function throttle(fn, ms = 1000) {
   const fire = () => { t = null; last = Date.now(); fn(...args); };
   const run = (...a) => { args = a; const wait = ms - (Date.now() - last); if (wait <= 0) { clearTimeout(t); fire(); } else if (!t) t = setTimeout(fire, wait); };
   run.flush = () => { if (t) { clearTimeout(t); fire(); } };
+  run.cancel = () => { clearTimeout(t); t = null; };
   return run;
 }
 

@@ -4,6 +4,7 @@ import { createStore } from "../../../vendor/zustand-vanilla.mjs";
 import { createHistory } from "../../shared/history.js";
 import { debounce, throttle } from "../../shared/dom.js";
 import { saveProject, lsSet } from "../../shared/storage.js";
+import { toast } from "../../shared/toast.js";
 
 /** doc = { meta, style, blocks }, images = { imgId: dataUrl }, proj = { id, name } */
 export const store = createStore(() => ({
@@ -34,12 +35,17 @@ const usedImages = () => {
 };
 let savedImages = "";
 /** Throttled autosave: at most one write per second; images are rewritten only when they actually changed. */
-export const persist = throttle(async () => {
+let warned = false;
+async function doSave() {
   if (!S.proj) return;
   const images = usedImages(), sig = Object.keys(images).sort().join();
-  await saveProject({ id: S.proj.id, name: S.proj.name, updated: Date.now(), doc: S.doc, ...(sig !== savedImages ? { images } : {}) });
-  savedImages = sig; bump("saved");
-}, 1000);
+  const ok = await saveProject({ id: S.proj.id, name: S.proj.name, updated: Date.now(), doc: S.doc, ...(sig !== savedImages ? { images } : {}) });
+  if (ok) { savedImages = sig; warned = false; bump("saved"); }
+  else if (!warned) { warned = true; toast("Could not save to this browser (storage blocked or full)", 5000); }
+}
+export const persist = throttle(doSave, 1000);
+/** Write everything now (tab closing, switching projects): flush pending edits and history first. */
+export async function saveNow() { commitSoon.flush(); persist.cancel(); await doSave(); }
 
 const commitNow = () => { if (history.push(JSON.stringify(S.doc))) persist(); };
 const commitSoon = debounce(commitNow, 500);

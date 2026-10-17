@@ -34,7 +34,7 @@ export function createDnd({ onReorder, onDropNew, onStart, onEnd } = {}) {
     } else if (source.data?.add && target && isSortable(target)) {
       const y = e.operation.position?.current?.y, mid = target.shape?.center?.y;
       onDropNew?.(source.data, target.index + (y != null && mid != null && y < mid ? 0 : 1));
-    } else if (source.data?.add) onDropNew?.(source.data, null);
+    }
   });
   return {
     manager,

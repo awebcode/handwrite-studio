@@ -24,10 +24,12 @@ function syncSlider(w) {
   input.value = w; if (input.nextElementSibling?.tagName === "OUTPUT") input.nextElementSibling.textContent = w + "%";
 }
 
-function start(e, b) {
+function start(e, b0) {
+  const id = b0.id;
   e.preventDefault(); e.stopPropagation();
-  const x0 = e.clientX, w0 = b.width ?? 78, st = S.doc.style, content = 794 - st.padLeft - st.padRight;
+  const x0 = e.clientX, w0 = b0.width ?? 78, st = S.doc.style, content = 794 - st.padLeft - st.padRight;
   const move = (ev) => {
+    const b = blockById(id); if (!b) return;
     const w = clamp(Math.round(w0 + (((ev.clientX - x0) / S.zoom) / content) * 100), 20, 100);
     if (w !== b.width) { b.width = w; syncSlider(w); touch(); }
   };
