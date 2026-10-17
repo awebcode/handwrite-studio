@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cover Page Maker</title>
+<style id="uicss">
+  :root { --ui-bg:#eef0f4; --ui-panel:#fff; --ui-ink:#1d2330; --ui-mute:#667085; --ui-line:#d8dce6; --ui-acc:#3b5bdb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ui-bg:#14171f; --ui-panel:#1c2030; --ui-ink:#e8ebf3; --ui-mute:#9aa3b8; --ui-line:#2e3448; --ui-acc:#7c93ff; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ui-bg); color:var(--ui-ink); font:14px/1.4 system-ui, sans-serif; display:flex; min-height:100vh; }
+  #panel { width:310px; flex:none; background:var(--ui-panel); border-right:1px solid var(--ui-line); padding:14px; overflow:auto; height:100vh; position:sticky; top:0; }
+  #panel h1 { font-size:17px; margin:0 0 2px; }
+  #panel h2 { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ui-mute); margin:16px 0 8px; }
+  #panel p.tip { color:var(--ui-mute); font-size:12px; margin:4px 0 0; }
+  .row { display:flex; gap:6px; align-items:center; margin:6px 0; flex-wrap:wrap; }
+  .row label { flex:1 1 100px; color:var(--ui-mute); font-size:12px; }
+  .row input[type=range] { flex:2 1 120px; }
+  .row input[type=text], .row select { flex:2 1 120px; padding:6px 8px; border:1px solid var(--ui-line); border-radius:6px; background:transparent; color:inherit; font:inherit; }
+  .row input[type=color] { width:38px; height:28px; padding:0; border:1px solid var(--ui-line); border-radius:6px; background:none; }
+  button { font:inherit; padding:7px 11px; border:1px solid var(--ui-line); background:transparent; color:inherit; border-radius:7px; cursor:pointer; }
+  button:hover { border-color:var(--ui-acc); }
+  button.pri { background:var(--ui-acc); border-color:var(--ui-acc); color:#fff; font-weight:600; }
+  button.on { background:var(--ui-acc); color:#fff; border-color:var(--ui-acc); }
+  button.sm { padding:4px 9px; font-size:12px; }
+  #none { color:var(--ui-mute); font-size:13px; }
+  #stagewrap { flex:1; overflow:auto; padding:22px; display:flex; justify-content:center; align-items:flex-start; }
+  #stage { position:relative; }
+  #toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:9px 14px; border-radius:8px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; }
+  #toast.show { opacity:1; }
+  #over { display:none; position:absolute; left:0; right:0; border-top:2px dashed #e03131; font-size:11px; color:#e03131; text-align:right; padding-top:2px; }
+  .hint-drop { outline:3px dashed var(--ui-acc); outline-offset:-6px; }
+  @media (max-width: 900px) { body { flex-direction:column; } #panel { width:100%; height:auto; position:static; border-right:0; border-bottom:1px solid var(--ui-line); } }
+  @media print { #panel, #toast, #over { display:none !important; } body { background:#fff; display:block; } #stagewrap { padding:0; display:block; overflow:visible; } #stage { width:auto !important; height:auto !important; } #sheet { transform:none !important; box-shadow:none !important; } .ui { display:none !important; } @page { size:A4; margin:0; } }
+</style>
+
+<style id="sheetcss">
+  .sheet { position:relative; width:794px; height:1122px; background:#fff; color:#000; box-sizing:border-box; overflow:visible; transform-origin:top left; box-shadow:0 2px 14px rgba(0,0,0,.18); font-family:var(--font); }
+  .sheet .inner { position:absolute; inset:0; padding:var(--padv) var(--padh); display:flex; flex-direction:column; }
+  .sheet .frame { position:absolute; inset:var(--frameInset); border:var(--frameW) solid var(--frameC); pointer-events:none; }
+  .blk { position:relative; flex:none; }
+  .blk .t { outline:none; white-space:pre-wrap; word-break:break-word; min-height:1em; }
+  .blk .t b, .blk .t strong { font-weight:700; }
+  .logo { display:flex; }
+  .logo img, .logo svg { display:block; max-width:100%; height:auto; }
+  .divider { border:0; border-top:1px solid #000; margin:0; }
+  table.tb { border-collapse:collapse; margin:0 auto; table-layout:fixed; }
+  table.tb th, table.tb td { border:1px solid var(--grid); padding:6px 8px; text-align:center; vertical-align:middle; word-break:break-word; }
+  table.tb th { background:var(--head); color:var(--headInk); font-weight:400; }
+  table.tb td { background:var(--row); }
+  table.tb [contenteditable] { outline:none; min-height:1em; }
+  /* editor-only chrome */
+  .ui { font:12px system-ui, sans-serif; }
+  .blk .grip { position:absolute; left:-40px; top:0; width:20px; height:22px; cursor:grab; background:var(--ui-acc, #3b5bdb); color:#fff; border-radius:4px; text-align:center; line-height:22px; opacity:0; user-select:none; }
+  .blk:hover .grip, .blk.sel .grip { opacity:1; }
+  .blk:hover { outline:1px dashed #9aa8ff; outline-offset:3px; }
+  .blk.sel { outline:2px solid #3b5bdb; outline-offset:3px; }
+  .blk.dropbefore::before, .blk.dropafter::after { content:""; position:absolute; left:-8px; right:-8px; height:3px; background:#3b5bdb; }
+  .blk.dropbefore::before { top:-5px; } .blk.dropafter::after { bottom:-5px; }
+  .logo.empty { border:2px dashed #9aa8ff; color:#6b78c9; align-items:center; justify-content:center; height:90px; font:13px system-ui; cursor:pointer; }
+  .logo .cap { position:absolute; right:-6px; top:-6px; display:flex; gap:4px; opacity:0; }
+  .blk.sel .logo .cap, .blk:hover .logo .cap { opacity:1; }
+  .logo .cap button { background:#fff; color:#222; border:1px solid #bbb; padding:2px 7px; font-size:11px; }
+  .logo { position:relative; }
+</style>
+</head>
+<body>
+<aside id="panel">
+  <h1>Cover Page Maker</h1>
+  <p class="tip">Click any text to edit it. Click a block to style it. Drag the blue grip to reorder. Drop an image on the logo.</p>
+
+  <h2>Export</h2>
+  <div class="row"><label for="fname">File name</label><input type="text" id="fname" value="cover-page"></div>
+  <div class="row">
+    <button class="pri" id="bPdf">⬇ Download PDF</button>
+    <button id="bPng">PNG</button>
+    <button id="bPrint">Print</button>
+  </div>
+  <div class="row">
+    <button class="sm" id="bSave">Save design (.json)</button>
+    <button class="sm" id="bLoad">Load</button>
+    <button class="sm" id="bReset">Reset</button>
+    <input type="file" id="fJson" accept="application/json,.json" hidden>
+    <input type="file" id="fImg" accept="image/*" hidden>
+  </div>
+
+  <h2>Selected block</h2>
+  <div id="none">Nothing selected. Click a line, the logo or the table.</div>
+  <div id="blockctl" hidden>
+    <div class="row"><label>Size</label><input type="range" id="cSize" min="8" max="64" step="1"><span id="vSize"></span></div>
+    <div class="row">
+      <button class="sm" id="cBold"><b>B</b></button><button class="sm" id="cItalic"><i>I</i></button><button class="sm" id="cUnder"><u>U</u></button>
+      <button class="sm" id="cL">⟸</button><button class="sm" id="cC">≡</button><button class="sm" id="cR">⟹</button>
+      <input type="color" id="cColor" title="Text colour">
+    </div>
+    <div class="row"><label>Font</label>
+      <select id="cFont">
+        <option value="">Page font</option>
+        <option value="'Times New Roman', 'Liberation Serif', Times, serif">Times / serif</option>
+        <option value="Arial, 'Liberation Sans', Helvetica, sans-serif">Arial / sans</option>
+        <option value="Georgia, 'DejaVu Serif', serif">Georgia</option>
+        <option value="'Arial Black', 'Liberation Sans', sans-serif">Arial Black</option>
+        <option value="'Courier New', 'Liberation Mono', monospace">Courier / mono</option>
+        <option value="'Palatino Linotype', Palatino, 'Book Antiqua', serif">Palatino</option>
+        <option value="'Trebuchet MS', Verdana, sans-serif">Trebuchet</option>
+      </select>
+    </div>
+    <div class="row"><label>Space above</label><input type="range" id="cMt" min="0" max="160" step="2"><span id="vMt"></span></div>
+    <div class="row"><label>Space below</label><input type="range" id="cMb" min="0" max="160" step="2"><span id="vMb"></span></div>
+    <div class="row"><label>Line height</label><input type="range" id="cLh" min="1" max="2.2" step="0.05"><span id="vLh"></span></div>
+    <div class="row"><label>Letter spacing</label><input type="range" id="cLs" min="-1" max="8" step="0.5"><span id="vLs"></span></div>
+    <div id="logoctl" hidden>
+      <div class="row"><label>Logo width</label><input type="range" id="cLogoW" min="30" max="400" step="2"><span id="vLogoW"></span></div>
+      <div class="row"><button class="sm" id="cLogoPick">Choose image…</button><button class="sm" id="cLogoDef">Default logo</button><button class="sm" id="cLogoNone">Remove</button></div>
+    </div>
+    <div id="tblctl" hidden>
+      <div class="row"><button class="sm" id="tAddR">+ row</button><button class="sm" id="tDelR">− row</button><button class="sm" id="tAddC">+ column</button><button class="sm" id="tDelC">− column</button></div>
+      <div class="row"><label>Table width</label><input type="range" id="tW" min="200" max="660" step="2"><span id="vtW"></span></div>
+      <div class="row"><label>Row text size</label><input type="range" id="tRs" min="9" max="34" step="1"><span id="vtRs"></span></div>
+      <div class="row"><label>Header size</label><input type="range" id="tHs" min="8" max="30" step="1"><span id="vtHs"></span></div>
+      <div class="row"><label>Row height</label><input type="range" id="tRh" min="0" max="40" step="1"><span id="vtRh"></span></div>
+      <div class="row"><label>Bold last column</label><input type="checkbox" id="tBold"></div>
+    </div>
+    <div class="row"><button class="sm" id="cDup">Duplicate</button><button class="sm" id="cUp">↑</button><button class="sm" id="cDown">↓</button><button class="sm" id="cDel">Delete</button></div>
+  </div>
+
+  <h2>Add block</h2>
+  <div class="row"><button class="sm" data-add="text">Text line</button><button class="sm" data-add="table">Table</button><button class="sm" data-add="logo">Logo</button><button class="sm" data-add="divider">Divider</button><button class="sm" data-add="spacer">Spacer</button></div>
+
+  <h2>Page</h2>
+  <div class="row"><label>Font</label>
+    <select id="pFont">
+      <option value="'Times New Roman', 'Liberation Serif', Times, serif">Times / serif</option>
+      <option value="Arial, 'Liberation Sans', Helvetica, sans-serif">Arial / sans</option>
+      <option value="Georgia, 'DejaVu Serif', serif">Georgia</option>
+      <option value="'Palatino Linotype', Palatino, 'Book Antiqua', serif">Palatino</option>
+      <option value="'Trebuchet MS', Verdana, sans-serif">Trebuchet</option>
+      <option value="'Courier New', 'Liberation Mono', monospace">Courier</option>
+    </select>
+  </div>
+  <div class="row"><label>Text scale</label><input type="range" id="pScale" min="0.7" max="1.4" step="0.02"><span id="vpScale"></span></div>
+  <div class="row"><label>Top / bottom margin</label><input type="range" id="pPadV" min="10" max="200" step="2"><span id="vpPadV"></span></div>
+  <div class="row"><label>Side margin</label><input type="range" id="pPadH" min="10" max="200" step="2"><span id="vpPadH"></span></div>
+  <div class="row"><label>Vertical align</label>
+    <select id="pJust"><option value="flex-start">Top</option><option value="center">Middle</option><option value="space-between">Spread</option></select></div>
+  <div class="row"><label>Page border</label><input type="checkbox" id="pFrame"></div>
+  <div class="row"><label>Border thickness</label><input type="range" id="pFrameW" min="1" max="12" step="1"></div>
+  <div class="row"><label>Border colour</label><input type="color" id="pFrameC"></div>
+  <div class="row"><label>Border inset</label><input type="range" id="pFrameI" min="6" max="60" step="1"><span id="vpFrameI"></span></div>
+  <div class="row"><label>Accent text</label><input type="color" id="pAccent"></div>
+  <div class="row"><label>Table header</label><input type="color" id="pHead"></div>
+  <div class="row"><label>Table header text</label><input type="color" id="pHeadInk"></div>
+  <div class="row"><label>Table rows</label><input type="color" id="pRow"></div>
+  <div class="row"><label>Table grid lines</label><input type="color" id="pGrid"></div>
+  <div class="row"><label>Paper colour</label><input type="color" id="pPaper"></div>
+  <div class="row"><label>Zoom</label><input type="range" id="zoom" min="0.4" max="1.4" step="0.05"><span id="vzoom"></span></div>
+</aside>
+
+<div id="stagewrap"><div id="stage"><div class="sheet" id="sheet"></div><div id="over" class="ui">Content runs past the bottom of the A4 page</div></div></div>
+<div id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+document.execCommand("defaultParagraphSeparator", false, "br");
+
+/* ---------- default design: the same layout as the reference cover ---------- */
+const SHIELD = `<svg viewBox="0 0 100 124" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="sh"><path d="M7 5H93V67C93 94 73 110 50 119C27 110 7 94 7 67Z"/></clipPath></defs><g clip-path="url(#sh)"><rect x="7" y="5" width="43" height="58" fill="#fff"/><rect x="50" y="5" width="43" height="58" fill="#4b1fd1"/><rect x="7" y="63" width="43" height="60" fill="#4b1fd1"/><rect x="50" y="63" width="43" height="60" fill="#fff"/></g><path d="M7 5H93V67C93 94 73 110 50 119C27 110 7 94 7 67Z" fill="none" stroke="#4b1fd1" stroke-width="6" stroke-linejoin="round"/><g fill="#4b1fd1"><path d="M15 22q9-6 18 0v22q-9-5-18 0zM35 22q9-6 18 0v0" opacity="0"/><path d="M14 21q10-5 18 1v21q-8-5-18-1z"/><path d="M36 22q8-6 18-1v21q-10-4-18 1z" transform="translate(-3 0)"/></g><g fill="#fff"><circle cx="71" cy="30" r="5"/><circle cx="71" cy="19" r="5"/><circle cx="71" cy="41" r="5"/><circle cx="60" cy="30" r="5"/><circle cx="82" cy="30" r="5"/></g><circle cx="71" cy="30" r="4" fill="#4b1fd1"/><g fill="#fff"><path d="M13 84q12-14 24-2l8 8q-6 8-14 4l-6-5-8 5q-6-4-4-10z"/><path d="M45 88q10-8 20 0"  opacity="0"/></g><g fill="#4b1fd1"><circle cx="72" cy="82" r="13"/><path d="M64 92l-4 20 12-6 12 6-4-20z"/></g><circle cx="72" cy="82" r="8" fill="#fff"/><circle cx="72" cy="82" r="4" fill="#4b1fd1"/></svg>`;
+const SHIELD_URL = "data:image/svg+xml;utf8," + encodeURIComponent(SHIELD);
+
+let uid = 0;
+const id = () => "b" + Date.now().toString(36) + (uid++);
+const T = (html, o = {}) => ({ id: id(), type: "text", html, size: 15, bold: false, italic: false, under: false, align: "center", color: "", font: "", mt: 0, mb: 0, lh: 1.25, ls: 0, ...o });
+
+function defaults() {
+  const A = "#0e5a6b";
+  return {
+    v: 1,
+    page: { font: "'Times New Roman', 'Liberation Serif', Times, serif", scale: 1, padV: 62, padH: 70, just: "flex-start", frame: false, frameW: 2, frameC: "#222222", frameI: 22, accent: A, head: "#4472c4", headInk: "#111111", row: "#dbe5f1", grid: "#8eaadb", paper: "#ffffff", zoom: 0.85 },
+    blocks: [
+      { id: id(), type: "logo", src: "", w: 76, mb: 6, align: "center" },
+      T("Assignment 1", { size: 31, bold: true, mb: 14 }),
+      T("Course Title: Course Name<br>Course code: CSE0000000", { size: 14, mb: 14 }),
+      T("Spring 2026", { size: 17 }),
+      T("Batch 00A Day", { size: 14, mb: 14 }),
+      T("Assignment: Assignment 1", { size: 28, bold: true, mb: 14 }),
+      T("<b>Date of Submission</b>: 01-01-2026", { size: 14.5, mb: 24 }),
+      T("Submitted to-", { size: 14.5, bold: true, mb: 6 }),
+      T("Teacher Name", { size: 19, bold: true, color: A, font: "Arial, 'Liberation Sans', Helvetica, sans-serif" }),
+      T("Lecturer", { size: 19, color: A }),
+      T("Department of CSE", { size: 19, color: A }),
+      T("Example University", { size: 14, color: A }),
+      T("City, Country", { size: 14, color: A, mb: 24 }),
+      { id: id(), type: "spacer", h: 56 },
+      T("Submitted By-", { size: 14.5, bold: true, mb: 12 }),
+      { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: true, mt: 0, mb: 0, headers: ["ID", "Name"], rows: [["0000000000", "Your Full Name"]] },
+    ],
+  };
+}
+
+/* ---------- state ---------- */
+let S = null, sel = null;
+const KEY = "cover.v1";
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+let saveT; const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(() => { save(); checkOverflow(); }, 250); };
+const blockById = (i) => S.blocks.find((b) => b.id === i);
+
+/* ---------- render ---------- */
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function textStyle(b) {
+  const sc = S.page.scale;
+  return `font-size:${(b.size * sc).toFixed(2)}px;font-weight:${b.bold ? 700 : 400};font-style:${b.italic ? "italic" : "normal"};text-decoration:${b.under ? "underline" : "none"};text-align:${b.align};line-height:${b.lh};letter-spacing:${b.ls}px;` +
+    (b.color ? `color:${b.color};` : "") + (b.font ? `font-family:${b.font};` : "");
+}
+function blockHtml(b) {
+  const mt = b.mt ?? 0, mb = b.mb ?? 0;
+  let inner = "";
+  if (b.type === "text") inner = `<div class="t" contenteditable="true" spellcheck="false" style="${textStyle(b)}">${b.html}</div>`;
+  else if (b.type === "logo") {
+    const img = b.src ? `<img src="${esc(b.src)}" style="width:${b.w}px" alt="logo">` : "";
+    const just = b.align === "left" ? "flex-start" : b.align === "right" ? "flex-end" : "center";
+    inner = b.src === ""
+      ? `<div class="logo" style="justify-content:${just}"><div style="width:${b.w}px">${SHIELD}</div><div class="cap ui"><button data-act="pick">Replace</button></div></div>`
+      : b.src === null
+        ? `<div class="logo empty ui" data-act="pick">Drop a logo image here or click to choose</div>`
+        : `<div class="logo" style="justify-content:${just}">${img}<div class="cap ui"><button data-act="pick">Replace</button></div></div>`;
+  } else if (b.type === "divider") inner = `<hr class="divider" style="border-top-width:${b.th || 1}px">`;
+  else if (b.type === "spacer") inner = `<div style="height:${b.h}px"></div>`;
+  else if (b.type === "table") {
+    const cs = b.headers.length;
+    const w = b.w, colw = (w / cs).toFixed(1);
+    let h = `<table class="tb" style="width:${w}px"><colgroup>${b.headers.map(() => `<col style="width:${colw}px">`).join("")}</colgroup><thead><tr>`;
+    h += b.headers.map((x, c) => `<th data-r="-1" data-c="${c}" style="font-size:${(b.headSize * S.page.scale).toFixed(1)}px;padding:${b.rowH || 6}px 8px"><div contenteditable="true" spellcheck="false">${x}</div></th>`).join("") + "</tr></thead><tbody>";
+    h += b.rows.map((r, ri) => "<tr>" + r.map((x, c) => `<td data-r="${ri}" data-c="${c}" style="font-size:${(b.rowSize * S.page.scale).toFixed(1)}px;padding:${(b.rowH || 6) + 2}px 8px;${b.boldLast && c === cs - 1 ? "font-weight:700;" : ""}"><div contenteditable="true" spellcheck="false">${x}</div></td>`).join("") + "</tr>").join("") + "</tbody></table>";
+    inner = h;
+  }
+  return `<div class="blk${sel === b.id ? " sel" : ""}" data-id="${b.id}" style="margin-top:${mt}px;margin-bottom:${b.type === "logo" && b.mb == null ? 0 : mb}px"><span class="grip ui" draggable="true" title="Drag to reorder">⋮⋮</span>${inner}</div>`;
+}
+function applyPage() {
+  const p = S.page, sh = $("sheet");
+  sh.style.setProperty("--font", p.font);
+  sh.style.setProperty("--padv", p.padV + "px"); sh.style.setProperty("--padh", p.padH + "px");
+  sh.style.setProperty("--accent", p.accent); sh.style.setProperty("--head", p.head); sh.style.setProperty("--headInk", p.headInk);
+  sh.style.setProperty("--row", p.row); sh.style.setProperty("--grid", p.grid);
+  sh.style.setProperty("--frameW", (p.frame ? p.frameW : 0) + "px"); sh.style.setProperty("--frameC", p.frameC); sh.style.setProperty("--frameInset", p.frameI + "px");
+  sh.style.background = p.paper;
+  const z = p.zoom;
+  sh.style.transform = `scale(${z})`;
+  $("stage").style.width = 794 * z + "px"; $("stage").style.height = 1122 * z + "px";
+}
+function render() {
+  applyPage();
+  $("sheet").innerHTML = `<div class="frame"></div><div class="inner" style="justify-content:${S.page.just}">` + S.blocks.map(blockHtml).join("") + "</div>";
+  bind(); syncPanel(); checkOverflow();
+}
+function checkOverflow() {
+  const inner = $("sheet").querySelector(".inner"); if (!inner) return;
+  const need = [...inner.children].reduce((t, c) => t + c.offsetHeight + (parseFloat(c.style.marginTop) || 0) + (parseFloat(c.style.marginBottom) || 0), 0) + S.page.padV * 2;
+  const o = $("over"); const bad = need > 1126;
+  o.style.display = bad ? "block" : "none"; o.style.top = 1122 * S.page.zoom + "px";
+}
+
+/* ---------- bind events on rendered blocks ---------- */
+function bind() {
+  document.querySelectorAll(".blk").forEach((el) => {
+    const b = blockById(el.dataset.id);
+    el.addEventListener("mousedown", () => select(b.id, false));
+    el.addEventListener("focusin", () => select(b.id, false));
+    if (b.type === "text") {
+      const t = el.querySelector(".t");
+      t.addEventListener("input", () => { b.html = t.innerHTML.replace(/<br>$/, ""); saveSoon(); });
+    }
+    if (b.type === "table") el.querySelectorAll("td,th").forEach((c) => {
+      const r = +c.dataset.r, k = +c.dataset.c;
+      c.firstChild.addEventListener("input", () => { (r < 0 ? b.headers : b.rows[r])[k] = c.firstChild.innerHTML; saveSoon(); });
+    });
+    el.querySelectorAll("[data-act=pick]").forEach((x) => x.addEventListener("click", (e) => { e.stopPropagation(); pickLogo(b.id); }));
+    const g = el.querySelector(".grip");
+    g.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/x-block", b.id); e.dataTransfer.effectAllowed = "move"; });
+    el.addEventListener("dragover", (e) => {
+      if (![...e.dataTransfer.types].includes("text/x-block")) return;
+      e.preventDefault(); clearDrop();
+      const r = el.getBoundingClientRect(); el.classList.add(e.clientY < r.top + r.height / 2 ? "dropbefore" : "dropafter");
+    });
+    el.addEventListener("dragleave", () => el.classList.remove("dropbefore", "dropafter"));
+    el.addEventListener("drop", (e) => {
+      const from = e.dataTransfer.getData("text/x-block"); if (!from) return;
+      e.preventDefault(); e.stopPropagation();
+      const after = el.classList.contains("dropafter"); clearDrop();
+      const fb = blockById(from); if (!fb || fb.id === b.id) return;
+      S.blocks.splice(S.blocks.indexOf(fb), 1);
+      S.blocks.splice(S.blocks.indexOf(b) + (after ? 1 : 0), 0, fb);
+      render(); save();
+    });
+  });
+}
+const clearDrop = () => document.querySelectorAll(".dropbefore,.dropafter").forEach((e) => e.classList.remove("dropbefore", "dropafter"));
+function select(i, rerender) {
+  if (sel === i && !rerender) return;
+  sel = i;
+  document.querySelectorAll(".blk").forEach((e) => e.classList.toggle("sel", e.dataset.id === i));
+  syncPanel();
+}
+
+/* ---------- panel <-> model ---------- */
+const rng = (idn, vid, get, set, fmt = (v) => v) => {
+  const el = $(idn);
+  el.addEventListener("input", () => { set(+el.value); if ($(vid)) $(vid).textContent = fmt(+el.value); renderKeep(); });
+};
+function renderKeep() { const a = document.activeElement; render(); save(); }
+function cur() { return sel ? blockById(sel) : null; }
+function syncPanel() {
+  const b = cur();
+  $("none").hidden = !!b; $("blockctl").hidden = !b;
+  if (b) {
+    const txt = b.type === "text";
+    ["cSize", "cBold", "cItalic", "cUnder", "cColor", "cFont", "cLh", "cLs"].forEach((x) => { $(x).closest(".row").style.display = txt ? "" : "none"; });
+    $("cL").closest(".row").style.display = (txt || b.type === "logo") ? "" : "none";
+    ["cBold", "cItalic", "cUnder", "cColor"].forEach((x) => { $(x).style.display = txt ? "" : "none"; });
+    $("cMt").closest(".row").style.display = b.type === "spacer" || b.type === "divider" ? "none" : "";
+    $("cMb").closest(".row").style.display = b.type === "spacer" ? "none" : "";
+    $("logoctl").hidden = b.type !== "logo"; $("tblctl").hidden = b.type !== "table";
+    if (txt) {
+      $("cSize").value = b.size; $("vSize").textContent = b.size; $("cColor").value = b.color || "#000000"; $("cFont").value = b.font || "";
+      $("cLh").value = b.lh; $("vLh").textContent = b.lh; $("cLs").value = b.ls; $("vLs").textContent = b.ls;
+      $("cBold").classList.toggle("on", b.bold); $("cItalic").classList.toggle("on", b.italic); $("cUnder").classList.toggle("on", b.under);
+    }
+    ["cL", "cC", "cR"].forEach((x, k) => $(x).classList.toggle("on", b.align === ["left", "center", "right"][k]));
+    $("cMt").value = b.mt || 0; $("vMt").textContent = b.mt || 0; $("cMb").value = b.mb || 0; $("vMb").textContent = b.mb || 0;
+    if (b.type === "logo") { $("cLogoW").value = b.w; $("vLogoW").textContent = b.w; }
+    if (b.type === "table") {
+      $("tW").value = b.w; $("vtW").textContent = b.w; $("tRs").value = b.rowSize; $("vtRs").textContent = b.rowSize;
+      $("tHs").value = b.headSize; $("vtHs").textContent = b.headSize; $("tRh").value = b.rowH; $("vtRh").textContent = b.rowH; $("tBold").checked = !!b.boldLast;
+    }
+  }
+  const p = S.page;
+  $("pFont").value = p.font; $("pScale").value = p.scale; $("vpScale").textContent = p.scale; $("pPadV").value = p.padV; $("vpPadV").textContent = p.padV;
+  $("pPadH").value = p.padH; $("vpPadH").textContent = p.padH; $("pJust").value = p.just; $("pFrame").checked = p.frame; $("pFrameW").value = p.frameW;
+  $("pFrameC").value = p.frameC; $("pFrameI").value = p.frameI; $("vpFrameI").textContent = p.frameI; $("pAccent").value = p.accent; $("pHead").value = p.head;
+  $("pHeadInk").value = p.headInk; $("pRow").value = p.row; $("pGrid").value = p.grid; $("pPaper").value = p.paper; $("zoom").value = p.zoom; $("vzoom").textContent = p.zoom;
+}
+function wirePanel() {
+  const setB = (k) => (v) => { const b = cur(); if (b) b[k] = v; };
+  rng("cSize", "vSize", 0, setB("size")); rng("cMt", "vMt", 0, setB("mt")); rng("cMb", "vMb", 0, setB("mb"));
+  rng("cLh", "vLh", 0, setB("lh")); rng("cLs", "vLs", 0, setB("ls")); rng("cLogoW", "vLogoW", 0, setB("w"));
+  rng("tW", "vtW", 0, setB("w")); rng("tRs", "vtRs", 0, setB("rowSize")); rng("tHs", "vtHs", 0, setB("headSize")); rng("tRh", "vtRh", 0, setB("rowH"));
+  $("tBold").onchange = () => { const b = cur(); b.boldLast = $("tBold").checked; renderKeep(); };
+  const tog = (idn, k) => ($(idn).onclick = () => { const b = cur(); b[k] = !b[k]; renderKeep(); });
+  tog("cBold", "bold"); tog("cItalic", "italic"); tog("cUnder", "under");
+  [["cL", "left"], ["cC", "center"], ["cR", "right"]].forEach(([x, v]) => ($(x).onclick = () => { cur().align = v; renderKeep(); }));
+  $("cColor").oninput = () => { cur().color = $("cColor").value; renderKeep(); };
+  $("cFont").onchange = () => { cur().font = $("cFont").value; renderKeep(); };
+  $("cDel").onclick = () => { const i = S.blocks.indexOf(cur()); S.blocks.splice(i, 1); sel = null; render(); save(); };
+  $("cDup").onclick = () => { const b = cur(), c = JSON.parse(JSON.stringify(b)); c.id = id(); S.blocks.splice(S.blocks.indexOf(b) + 1, 0, c); sel = c.id; render(); save(); };
+  const mv = (d) => { const b = cur(), i = S.blocks.indexOf(b), j = i + d; if (j < 0 || j >= S.blocks.length) return; S.blocks.splice(i, 1); S.blocks.splice(j, 0, b); render(); save(); };
+  $("cUp").onclick = () => mv(-1); $("cDown").onclick = () => mv(1);
+  $("tAddR").onclick = () => { const b = cur(); b.rows.push(b.headers.map(() => "&nbsp;")); renderKeep(); };
+  $("tDelR").onclick = () => { const b = cur(); if (b.rows.length > 1) b.rows.pop(); renderKeep(); };
+  $("tAddC").onclick = () => { const b = cur(); b.headers.push("Column"); b.rows.forEach((r) => r.push("&nbsp;")); renderKeep(); };
+  $("tDelC").onclick = () => { const b = cur(); if (b.headers.length > 1) { b.headers.pop(); b.rows.forEach((r) => r.pop()); } renderKeep(); };
+  $("cLogoPick").onclick = () => pickLogo(sel);
+  $("cLogoDef").onclick = () => { cur().src = ""; renderKeep(); };
+  $("cLogoNone").onclick = () => { cur().src = null; renderKeep(); };
+  document.querySelectorAll("[data-add]").forEach((b) => (b.onclick = () => addBlock(b.dataset.add)));
+  const pg = (idn, k, conv = (v) => v, vid) => { const el = $(idn); el.addEventListener("input", () => { S.page[k] = conv(el.type === "checkbox" ? el.checked : el.value); if (vid) $(vid).textContent = S.page[k]; renderKeep(); }); };
+  pg("pFont", "font"); pg("pScale", "scale", Number, "vpScale"); pg("pPadV", "padV", Number, "vpPadV"); pg("pPadH", "padH", Number, "vpPadH"); pg("pJust", "just");
+  pg("pFrame", "frame"); pg("pFrameW", "frameW", Number); pg("pFrameC", "frameC"); pg("pFrameI", "frameI", Number, "vpFrameI");
+  pg("pAccent", "accent"); pg("pHead", "head"); pg("pHeadInk", "headInk"); pg("pRow", "row"); pg("pGrid", "grid"); pg("pPaper", "paper"); pg("zoom", "zoom", Number, "vzoom");
+  $("pAccent").addEventListener("input", () => { S.blocks.forEach((b) => { if (b.type === "text" && b.color) b.color = S.page.accent; }); });
+}
+function addBlock(type) {
+  let b;
+  if (type === "text") b = T("New line", { size: 16, mb: 6 });
+  else if (type === "divider") b = { id: id(), type: "divider", th: 1, mt: 8, mb: 8 };
+  else if (type === "spacer") b = { id: id(), type: "spacer", h: 30 };
+  else if (type === "logo") b = { id: id(), type: "logo", src: "", w: 76, mb: 6, align: "center" };
+  else b = { id: id(), type: "table", w: 520, headSize: 13, rowSize: 19, rowH: 8, boldLast: false, mt: 0, mb: 0, headers: ["Column 1", "Column 2"], rows: [["&nbsp;", "&nbsp;"]] };
+  const i = sel ? S.blocks.indexOf(cur()) + 1 : S.blocks.length;
+  S.blocks.splice(i, 0, b); sel = b.id; render(); save();
+}
+
+/* ---------- logo: click or drag and drop ---------- */
+let logoTarget = null;
+function pickLogo(i) { logoTarget = i; $("fImg").value = ""; $("fImg").click(); }
+function setLogo(file, i) {
+  if (!file || !file.type.startsWith("image/")) return toast("That is not an image");
+  const r = new FileReader();
+  r.onload = () => {
+    let b = i ? blockById(i) : S.blocks.find((x) => x.type === "logo");
+    if (!b || b.type !== "logo") { b = { id: id(), type: "logo", src: "", w: 90, mb: 6, align: "center" }; S.blocks.unshift(b); }
+    b.src = r.result; sel = b.id; render(); save(); toast("Logo updated");
+  };
+  r.readAsDataURL(file);
+}
+$("fImg").onchange = (e) => setLogo(e.target.files[0], logoTarget);
+const stage = $("stagewrap");
+["dragenter", "dragover"].forEach((ev) => stage.addEventListener(ev, (e) => { if ([...e.dataTransfer.types].includes("Files")) { e.preventDefault(); stage.classList.add("hint-drop"); } }));
+stage.addEventListener("dragleave", (e) => { if (e.target === stage) stage.classList.remove("hint-drop"); });
+stage.addEventListener("drop", (e) => {
+  stage.classList.remove("hint-drop");
+  const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (!f) return;
+  e.preventDefault();
+  if (f.type === "application/json" || f.name.endsWith(".json")) return loadJson(f);
+  const blk = e.target.closest && e.target.closest(".blk");
+  setLogo(f, blk && blockById(blk.dataset.id)?.type === "logo" ? blk.dataset.id : null);
+});
+document.addEventListener("paste", (e) => {
+  const t = e.target;
+  if (t && t.isContentEditable) { e.preventDefault(); document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text/plain")); }
+});
+
+/* ---------- export ---------- */
+function exportHtml() {
+  const sh = $("sheet").cloneNode(true);
+  sh.querySelectorAll(".ui").forEach((e) => e.remove());
+  sh.querySelectorAll("[contenteditable]").forEach((e) => e.removeAttribute("contenteditable"));
+  sh.querySelectorAll(".blk").forEach((e) => e.classList.remove("sel", "dropbefore", "dropafter"));
+  sh.querySelectorAll(".grip").forEach((e) => e.remove());
+  sh.style.transform = "none"; sh.style.boxShadow = "none"; sh.style.overflow = "hidden"; sh.id = "sheet";
+  const css = $("sheetcss").textContent;
+  return `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:0}html,body{margin:0;padding:0;background:#fff}${css}.blk:hover{outline:0!important}</style></head><body>${sh.outerHTML}</body></html>`;
+}
+const fileBase = () => ($("fname").value || "cover-page").replace(/[^\w.-]+/g, "_");
+function download(blob, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+async function serverExport(kind) {
+  const r = await fetch("/api/cover/" + kind, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ html: exportHtml() }) });
+  if (!r.ok) throw new Error("export failed " + r.status);
+  download(await r.blob(), fileBase() + "." + kind);
+}
+$("bPdf").onclick = async () => {
+  toast("Rendering PDF…");
+  try { await serverExport("pdf"); toast("PDF downloaded"); }
+  catch (e) { toast("Server export unavailable - opening print dialog (choose Save as PDF)"); setTimeout(() => window.print(), 600); }
+};
+$("bPng").onclick = async () => { toast("Rendering PNG…"); try { await serverExport("png"); toast("PNG downloaded"); } catch (e) { toast("PNG needs the preview server (npm run hw:preview)"); } };
+$("bPrint").onclick = () => window.print();
+$("bSave").onclick = () => download(new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }), fileBase() + ".json");
+$("bLoad").onclick = () => $("fJson").click();
+$("fJson").onchange = (e) => e.target.files[0] && loadJson(e.target.files[0]);
+function loadJson(f) { const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (!d.blocks || !d.page) throw 0; S = d; sel = null; render(); save(); toast("Design loaded"); } catch (e) { toast("Not a valid design file"); } }; r.readAsText(f); }
+$("bReset").onclick = () => { if (confirm("Reset the cover page to the default design?")) { S = defaults(); sel = null; render(); save(); } };
+let tt; function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2600); }
+
+/* ---------- boot: saved design > local preset > defaults ---------- */
+(async function boot() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (saved && saved.blocks && saved.page) S = saved;
+  else {
+    try { const r = await fetch("/cover/preset.local.json"); if (r.ok) { const d = await r.json(); if (d.blocks && d.page) S = d; } } catch (e) {}
+  }
+  if (!S) S = defaults();
+  wirePanel(); render();
+  document.body.dataset.ready = "1";
+})();
+document.addEventListener("click", (e) => { if (!e.target.closest(".blk") && !e.target.closest("#panel")) { sel = null; document.querySelectorAll(".blk.sel").forEach((x) => x.classList.remove("sel")); syncPanel(); } });
+</script>
+</body>
+</html>

@@ -1,13 +1,18 @@
-// Tiny dependency-free preview server: node tools/hwbuild/preview.mjs  (PORT=8080 by default)
+// Tiny preview server (no framework):  node tools/hwbuild/preview.mjs     PORT=8080 HOST=127.0.0.1
+//   /             handwritten assignments (student tabs, page images, Download as PDF)
+//   /cover        editable A4 cover-page maker (drag & drop logo, PDF / PNG export)
 import { createServer } from "node:http";
 import { readFileSync, existsSync, readdirSync, statSync, createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { chromium } from "playwright";
+import { findChrome } from "./lib/chrome.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const pub = path.join(root, "public");
 const port = Number(process.env.PORT || 8080);
-const types = { ".html": "text/html", ".jpg": "image/jpeg", ".pdf": "application/pdf", ".json": "application/json" };
+const host = process.env.HOST || "127.0.0.1";
+const types = { ".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".pdf": "application/pdf", ".json": "application/json", ".png": "image/png" };
 
 function manifests() {
   if (!existsSync(pub)) return [];
@@ -17,17 +22,54 @@ function manifests() {
     .map((f) => JSON.parse(readFileSync(f, "utf8")));
 }
 
-createServer((req, res) => {
-  const url = decodeURIComponent((req.url || "/").split("?")[0]);
-  if (url === "/api/manifests") {
-    res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify(manifests()));
+// Render the cover page HTML in headless Chromium. Scripts are off and only data: URLs load.
+async function renderCover(html, kind) {
+  const exe = findChrome();
+  const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: ["--no-sandbox", "--disable-dev-shm-usage"] });
+  try {
+    const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 794, height: 1122 }, deviceScaleFactor: kind === "png" ? 2 : 1 });
+    const page = await ctx.newPage();
+    await page.route("**/*", (r) => (r.request().url().startsWith("data:") || r.request().url() === "about:blank" ? r.continue() : r.abort()));
+    await page.setContent(html, { waitUntil: "load" });
+    if (kind === "png") return await page.locator("#sheet").screenshot({ type: "png" });
+    return await page.pdf({ width: "794px", height: "1122px", printBackground: true, pageRanges: "1", margin: { top: 0, right: 0, bottom: 0, left: 0 } });
+  } finally {
+    await browser.close();
   }
-  const file = url === "/" ? path.join(root, "preview/index.html") : path.join(pub, url);
-  if (!file.startsWith(root) || !existsSync(file) || !statSync(file).isFile()) {
-    res.writeHead(404);
-    return res.end("not found");
-  }
+}
+
+function readBody(req, limit = 40 * 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    const chunks = []; let n = 0;
+    req.on("data", (c) => { n += c.length; if (n > limit) { reject(new Error("too large")); req.destroy(); } else chunks.push(c); });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function sendFile(res, file) {
+  if (!file.startsWith(root) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); return res.end("not found"); }
   res.writeHead(200, { "content-type": types[path.extname(file)] || "application/octet-stream" });
   createReadStream(file).pipe(res);
-}).listen(port, "0.0.0.0", () => console.log(`Preview on http://localhost:${port}`));
+}
+
+createServer(async (req, res) => {
+  const url = decodeURIComponent((req.url || "/").split("?")[0]);
+  try {
+    if (req.method === "POST" && /^\/api\/cover\/(pdf|png)$/.test(url)) {
+      const kind = url.endsWith("pdf") ? "pdf" : "png";
+      const { html } = JSON.parse(await readBody(req));
+      const buf = await renderCover(String(html || ""), kind);
+      res.writeHead(200, { "content-type": kind === "pdf" ? "application/pdf" : "image/png" });
+      return res.end(buf);
+    }
+    if (url === "/api/manifests") { res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(manifests())); }
+    if (url === "/") return sendFile(res, path.join(root, "preview/index.html"));
+    if (url === "/cover" || url === "/cover/") return sendFile(res, path.join(root, "cover/index.html"));
+    if (url.startsWith("/cover/")) return sendFile(res, path.join(root, url));
+    return sendFile(res, path.join(pub, url));
+  } catch (e) {
+    res.writeHead(500, { "content-type": "text/plain" });
+    res.end(String(e.message || e));
+  }
+}).listen(port, host, () => console.log(`Preview on http://localhost:${port}   (cover page maker: http://localhost:${port}/cover)`));

@@ -11,10 +11,13 @@
     "hw:new": "node tools/hwbuild/new-assignment.mjs",
     "hw:new-student": "node tools/hwbuild/new-student.mjs",
     "hw:preview": "npm run hw:build && node tools/hwbuild/preview.mjs",
-    "hw:preview:fast": "node tools/hwbuild/preview.mjs"
+    "hw:preview:fast": "node tools/hwbuild/preview.mjs",
+    "cover": "node tools/hwbuild/preview.mjs"
   },
   "dependencies": {
     "playwright": "^1.62.0"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

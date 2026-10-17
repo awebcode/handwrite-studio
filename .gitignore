@@ -19,3 +19,6 @@ tools/hwbuild/profiles/*.mjs
 !tools/hwbuild/profiles/_template.mjs
 .env
 .env.*
+
+# your own cover-page content (auto-loaded by /cover when present)
+cover/preset.local.json

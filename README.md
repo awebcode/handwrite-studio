@@ -7,6 +7,7 @@ Write the questions and answers once in plain JavaScript, describe each student 
 - a PDF named `ROLL-NAME-BATCH-ASSIGNMENT_NAME.pdf` (all uppercase)
 - the page images (JPG, 1240x1754 = 150 dpi A4)
 - a web preview with a **Download as PDF** button
+- an **editable A4 cover page maker** (drag & drop logo, every field editable, PDF / PNG export)
 
 | Student A | Student B | Output screenshots |
 |---|---|---|
@@ -50,6 +51,27 @@ HW_ASSIGNMENT=lab2 npm run hw:preview
 
 Output goes to `public/<outDir>/` (PDFs and `<student>/NN.jpg`). The preview page lists the last build.
 
+## Cover page maker
+
+An editable **A4 cover page** (logo, title, course, batch, date, "Submitted to", "Submitted by" table) that you can customise in the browser and download as PDF or PNG.
+
+![cover editor](docs/cover-editor.png)
+
+```bash
+npm run cover        # then open http://localhost:8080/cover
+```
+
+- **Everything is editable in place** - click any line, label or table cell and type. Ctrl+B / I / U work inside a line.
+- **Click a block to style it**: size, bold / italic / underline, colour, font, alignment, space above / below, line height, letter spacing.
+- **Drag the blue grip** to reorder blocks; **add** text lines, tables, logos, dividers and spacers; duplicate or delete any block.
+- **Logo**: drag & drop an image onto the page (or onto the logo), or click *Replace*. Remove it or go back to the default shield.
+- **Table**: add / remove rows and columns, change width, text sizes, row height, header and row colours.
+- **Page**: font, text scale, margins, vertical alignment, optional page border, accent / table / paper colours, zoom.
+- **Export**: *Download PDF* (vector text, exact A4, rendered by headless Chromium), *PNG* (2x), *Print*, plus *Save design (.json)* / *Load* to reuse a design. Your design is also remembered in the browser.
+- **Your own default content**: put a saved design at `cover/preset.local.json` (git-ignored) and it loads automatically on first open.
+
+If you open `cover/index.html` without the preview server, everything works except PDF / PNG download; the *Download PDF* button then falls back to the browser's print dialog (choose *Save as PDF*).
+
 ## Project layout
 
 ```
@@ -65,6 +87,7 @@ tools/hwbuild/
   preview.mjs               tiny dependency-free preview server
   fonts/                    Gloria Hallelujah, Kalam, VT323 (SIL OFL)
 preview/index.html          preview page (student tabs, page images, Download as PDF)
+cover/index.html            editable A4 cover-page maker (single file, no dependencies)
 ```
 
 ## Write an assignment
